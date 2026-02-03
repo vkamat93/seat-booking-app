@@ -1,0 +1,144 @@
+/**
+ * Home Page Styles
+ */
+
+.home-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.home-header h1 {
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.home-header p {
+  color: #9ca3af;
+  font-size: 1.1rem;
+}
+
+.info-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.info-banner a {
+  color: #4cc9f0;
+  font-weight: 600;
+}
+
+.info-banner a:hover {
+  text-decoration: underline;
+}
+
+.info-available {
+  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: #86efac;
+}
+
+.user-booking-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(76, 201, 240, 0.15) 0%, rgba(67, 97, 238, 0.15) 100%);
+  border: 2px solid #4cc9f0;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.user-booking-info strong {
+  color: #4cc9f0;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.alert-success {
+  background: rgba(74, 222, 128, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: #86efac;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem;
+  color: #9ca3af;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(76, 201, 240, 0.2);
+  border-top-color: #4cc9f0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auto-release-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 10px;
+  color: #fcd34d;
+  font-size: 0.9rem;
+}
+
+.auto-release-notice strong {
+  color: #fbbf24;
+}
+
+@media (max-width: 600px) {
+  .home-container {
+    padding: 1rem;
+  }
+  
+  .home-header h1 {
+    font-size: 1.8rem;
+  }
+}

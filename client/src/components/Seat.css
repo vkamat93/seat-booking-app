@@ -1,0 +1,85 @@
+/**
+ * Office Desk Styles - Simplified
+ */
+
+.seat {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Free seat - green */
+.seat-free {
+  background-color: #22c55e;
+  border-color: #16a34a;
+  color: #fff;
+}
+
+.seat-free:hover {
+  background-color: #16a34a;
+  transform: scale(1.05);
+}
+
+/* Booked seat - red */
+.seat-booked {
+  background-color: #ef4444;
+  border-color: #dc2626;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* User's seat - blue */
+.seat-user {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.seat-user:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
+}
+
+/* Disabled state */
+.seat-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.seat:disabled {
+  cursor: not-allowed;
+}
+
+.seat:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .seat {
+    width: 75px;
+    height: 75px;
+  }
+  
+  .seat-icon {
+    font-size: 1.2rem;
+  }
+  
+  .seat-number {
+    font-size: 0.7rem;
+  }
+  
+  .seat-status-text {
+    font-size: 0.55rem;
+  }
+}
