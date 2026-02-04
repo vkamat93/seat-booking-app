@@ -1,14 +1,14 @@
 # 🏢 Office Desk Booking System
 
-A full-stack MERN application for office desk reservation with automatic daily reset at 1:00 AM.
+A full-stack MERN application for office desk reservation with automatic daily reset at EOD.
 
 ## Features
 
-- 🪑 **10 Office Desks** - 2 rows × 5 desks visual layout
+- 🪑 **12 Office Desks** - 2 rows × 6 desks visual layout
 - 🔐 **Secure Authentication** - JWT-based auth with bcrypt password hashing
 - 🔒 **Atomic Booking** - Prevents double-booking with MongoDB transactions
 - 👤 **One Desk Per User** - Each user can book only one desk
-- ⏰ **Auto-Release at 1 AM** - Desks automatically freed daily using node-cron
+- ⏰ **Auto-Release at xx:xx AM** - Desks automatically freed daily using node-cron
 - 🎨 **Modern UI** - Responsive React interface with visual desk status
 - 📊 **MongoDB Atlas** - Cloud database with connection pooling
 
@@ -124,13 +124,13 @@ Frontend will run on `http://localhost:3000`
 2. **Login** - Sign in with your credentials
 3. **Book a Desk** - Click on an available (green) desk to book it
 4. **View Bookings** - See which desks are occupied and by whom
-5. **Auto-Release** - All desks are freed at 1:00 AM daily
+5. **Auto-Release** - All desks are freed at xx:xx AM daily
 
 ### Desk Status Legend
 
-- 🖥️ **Green** - Available desk
-- 💼 **Blue** - Your booked desk
-- 🧑‍💻 **Red** - Occupied by another user
+- **Green** - Available desk
+- **Blue** - Your booked desk
+- **Red** - Occupied by another user
 
 ## Auto-Release Job
 
@@ -139,8 +139,8 @@ The application uses `node-cron` to automatically release all desk bookings at *
 **Implementation:** `server/jobs/seatReleaseJob.js`
 
 ```javascript
-cron.schedule('0 1 * * *', async () => {
-  // Runs daily at 1:00 AM
+cron.schedule('30 4 * * *', async () => {
+  // Eg: Runs daily at 4:30 AM
   // Releases all desk bookings
 });
 ```
@@ -183,7 +183,7 @@ cron.schedule('0 1 * * *', async () => {
 
 ```javascript
 {
-  seatNumber: Number (1-10),
+  seatNumber: Number (474- 485),
   row: Number (1-2),
   isBooked: Boolean,
   bookedBy: ObjectId (ref: 'User'),
@@ -233,7 +233,7 @@ seat-book/
 
 ## Security Features
 
-- ✅ Password hashing with bcrypt (10 salt rounds)
+- ✅ Password hashing with bcrypt
 - ✅ JWT authentication with 7-day expiration
 - ✅ Protected routes on frontend and backend
 - ✅ Input validation and sanitization
