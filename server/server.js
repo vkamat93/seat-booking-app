@@ -79,7 +79,7 @@ const startServer = async () => {
     // Initialize seats if needed
     await initializeSeats();
     
-    // Initialize the cron job for seat release at 1 AM
+    // Initialize the cron job for seat release at xx:xx AM
     initSeatReleaseJob();
     
     // Start listening

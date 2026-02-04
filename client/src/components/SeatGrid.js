@@ -9,7 +9,8 @@ import './SeatGrid.css';
 
 const SeatGrid = ({ seats, userSeatId, onBook, onRelease, isAuthenticated, loading }) => {
   // Organize seats into rows
-  const row1 = seats.filter(seat => seat.row === 1);
+  // Row 1: Reverse order so 474 is at bottom, going upward (for mobile vertical layout)
+  const row1 = seats.filter(seat => seat.row === 1).reverse();
   const row2 = seats.filter(seat => seat.row === 2);
 
   return (

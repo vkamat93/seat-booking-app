@@ -73,7 +73,7 @@ const initSeatReleaseJob = () => {
     timezone: 'Asia/Kolkata' // Adjust timezone as needed
   });
 
-  console.log('Seat release cron job scheduled for 1:00 AM daily');
+  console.log('Seat release cron job scheduled for 1:35 AM daily');
   
   return job;
 };

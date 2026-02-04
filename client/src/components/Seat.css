@@ -14,6 +14,11 @@
   transition: all 0.2s ease;
   font-size: 1rem;
   font-weight: 600;
+  /* Prevent text selection on mobile */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Better touch targets */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Free seat - green */
@@ -62,6 +67,64 @@
 .seat:disabled:hover {
   transform: none;
   box-shadow: none;
+}
+
+/* Tablet breakpoint */
+@media (max-width: 768px) {
+  .seat {
+    width: 65px;
+    height: 65px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+}
+
+/* Mobile breakpoint - vertical layout allows bigger seats */
+@media (max-width: 480px) {
+  .seat {
+    width: 60px;
+    height: 60px;
+    font-size: 0.85rem;
+    border-width: 2px;
+    border-radius: 8px;
+  }
+  
+  /* Disable hover effects on touch devices */
+  .seat-free:hover,
+  .seat-user:hover {
+    transform: none;
+  }
+  
+  /* Use active state instead for touch feedback */
+  .seat-free:active {
+    background-color: #16a34a;
+    transform: scale(0.95);
+  }
+  
+  .seat-user:active {
+    background-color: #2563eb;
+    transform: scale(0.95);
+  }
+}
+
+/* Small mobile breakpoint */
+@media (max-width: 360px) {
+  .seat {
+    width: 52px;
+    height: 52px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+}
+
+/* Extra small mobile */
+@media (max-width: 320px) {
+  .seat {
+    /* 6 seats in ~260px: (260 - 5*3px gaps) / 6 ≈ 40px */
+    width: 38px;
+    height: 38px;
+    font-size: 0.6rem;
+  }
 }
 
 /* Responsive */

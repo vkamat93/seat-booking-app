@@ -142,3 +142,115 @@
     font-size: 1.8rem;
   }
 }
+
+/* Tablet breakpoint */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 1.5rem;
+  }
+  
+  .home-header h1 {
+    font-size: 2rem;
+  }
+  
+  .home-header p {
+    font-size: 1rem;
+  }
+  
+  .info-banner {
+    padding: 0.7rem 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .user-booking-info {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  
+  .auto-release-notice {
+    font-size: 0.85rem;
+    padding: 0.875rem;
+  }
+}
+
+/* Mobile breakpoint */
+@media (max-width: 480px) {
+  .home-container {
+    padding: 1rem;
+  }
+  
+  .home-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .home-header h1 {
+    font-size: 1.6rem;
+  }
+  
+  .home-header p {
+    font-size: 0.9rem;
+  }
+  
+  .info-banner {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .user-booking-info {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .alert {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+  
+  .loading {
+    padding: 2rem;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+  
+  .auto-release-notice {
+    font-size: 0.8rem;
+    padding: 0.75rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+}
+
+/* Small mobile breakpoint */
+@media (max-width: 360px) {
+  .home-header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .home-header p {
+    font-size: 0.85rem;
+  }
+  
+  .info-banner {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .user-booking-info {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.75rem;
+  }
+}
