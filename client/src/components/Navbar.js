@@ -6,6 +6,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { APP_VERSION } from '../utils/constants';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -22,6 +23,7 @@ const Navbar = () => {
       <div className="navbar-container">
         <Link to="/" className="navbar-brand">
           Desk Booking App
+          <span className="app-version">v{APP_VERSION}</span>
         </Link>
         
         <div className="navbar-menu">

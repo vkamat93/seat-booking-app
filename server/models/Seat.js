@@ -6,22 +6,20 @@
 const mongoose = require('mongoose');
 
 const seatSchema = new mongoose.Schema({
-  // Unique seat number (BTI-474 to BTI-485)
+  // Unique seat number (BTI-406 to BTI-417, BTI-474 to BTI-495)
   seatNumber: {
     type: Number,
     required: true,
-    unique: true,
-    min: 474,
-    max: 485
+    unique: true
   },
-  // Row number (1 or 2)
+  // Row number (1-4 for main section, 5-10 for right cluster)
   row: {
     type: Number,
     required: true,
     min: 1,
-    max: 2
+    max: 10
   },
-  // Position within the row (1-5)
+  // Position within the row (1-6)
   position: {
     type: Number,
     required: true,
