@@ -94,7 +94,7 @@ const Home = () => {
         {!isAuthenticated && (
           <div className="info-banner">
             <span>ℹ️</span>
-            Please <a href="/login">login</a> or <a href="/register">register</a> to book a desk
+            Please <a href="/login">login</a> to book a desk
           </div>
         )}
 

@@ -157,6 +157,12 @@
   text-decoration: underline;
 }
 
+.login-hint {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
 /* Tablet breakpoint */
 @media (max-width: 768px) {
   .auth-container {

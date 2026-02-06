@@ -1,12 +1,14 @@
 /**
  * Authentication Routes
- * Handles user registration, login, and profile retrieval
+ * Handles user login and profile retrieval
+ * Registration is disabled - users are auto-created on first login with default password
  */
 
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
+const { isUsernameAllowed, getDefaultPassword } = require('../config/allowedUsers');
 
 const router = express.Router();
 
@@ -22,57 +24,9 @@ const generateToken = (id) => {
 };
 
 /**
- * @route   POST /api/auth/register
- * @desc    Register a new user
- * @access  Public
- */
-router.post('/register', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    // Validate input
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
-    }
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ username });
-
-    if (existingUser) {
-      return res.status(400).json({ message: 'Username already taken' });
-    }
-
-    // Create new user
-    const user = await User.create({
-      username,
-      password
-    });
-
-    // Generate token and respond
-    const token = generateToken(user._id);
-
-    res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      bookedSeat: user.bookedSeat,
-      token
-    });
-  } catch (error) {
-    console.error('Registration error:', error);
-    
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(e => e.message);
-      return res.status(400).json({ message: messages.join(', ') });
-    }
-    
-    res.status(500).json({ message: 'Server error during registration' });
-  }
-});
-
-/**
  * @route   POST /api/auth/login
  * @desc    Authenticate user and get token
+ *          Auto-creates user on first login if username is allowed
  * @access  Public
  */
 router.post('/login', async (req, res) => {
@@ -84,11 +38,33 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Please provide username and password' });
     }
 
-    // Find user by username (include password for comparison)
-    const user = await User.findOne({ username }).select('+password');
+    // Check if username is in the allowed list
+    if (!isUsernameAllowed(username)) {
+      return res.status(403).json({ message: 'Username not authorized. Please contact administrator.' });
+    }
 
+    // Find user by username (include password for comparison)
+    let user = await User.findOne({ username: username.toLowerCase() }).select('+password');
+
+    // If user doesn't exist and username is allowed, auto-create with default password
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      // Get the unique default password for this user
+      const defaultPassword = getDefaultPassword(username);
+      
+      // Only allow login with the user's default password for new users
+      if (password !== defaultPassword) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      
+      // Create new user with their unique default password
+      user = await User.create({
+        username: username.toLowerCase(),
+        password: defaultPassword,
+        mustChangePassword: true
+      });
+      
+      // Reload user with password for token generation
+      user = await User.findById(user._id).select('+password');
     }
 
     // Check password
@@ -105,6 +81,7 @@ router.post('/login', async (req, res) => {
       _id: user._id,
       username: user.username,
       bookedSeat: user.bookedSeat,
+      mustChangePassword: user.mustChangePassword,
       token
     });
   } catch (error) {
@@ -126,11 +103,54 @@ router.get('/me', protect, async (req, res) => {
     res.json({
       _id: user._id,
       username: user.username,
-      bookedSeat: user.bookedSeat
+      bookedSeat: user.bookedSeat,
+      mustChangePassword: user.mustChangePassword
     });
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+/**
+ * @route   POST /api/auth/change-password
+ * @desc    Change user password (required for first-time login)
+ * @access  Private
+ */
+router.post('/change-password', protect, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Please provide current and new password' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    // Get user with password
+    const user = await User.findById(req.user._id).select('+password');
+
+    // Verify current password
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect' });
+    }
+
+    // Update password and set mustChangePassword to false
+    user.password = newPassword;
+    user.mustChangePassword = false;
+    await user.save();
+
+    res.json({ 
+      message: 'Password changed successfully',
+      mustChangePassword: false
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ message: 'Server error during password change' });
   }
 });
 

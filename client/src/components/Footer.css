@@ -1,0 +1,61 @@
+/**
+ * Footer Styles
+ * Matches Navbar styling for consistency
+ */
+
+.footer {
+  background-color: #1a1a2e;
+  padding: 12px 20px;
+  border-top: 1px solid #16213e;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-text {
+  color: #a0a0a0;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+}
+
+.footer-text .heart {
+  color: #e74c3c;
+  display: inline-block;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .footer {
+    padding: 10px 15px;
+  }
+
+  .footer-text {
+    font-size: 0.8rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .footer {
+    padding: 10px 12px;
+  }
+
+  .footer-text {
+    font-size: 0.75rem;
+  }
+}

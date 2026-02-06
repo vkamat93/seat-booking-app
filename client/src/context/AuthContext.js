@@ -31,17 +31,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Register new user
-  const register = async (username, password) => {
-    const response = await authAPI.register({ username, password });
-    const { token, ...userData } = response.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    return userData;
-  };
-
-  // Login user
+  // Login user (also handles first-time login/auto-registration)
   const login = async (username, password) => {
     const response = await authAPI.login({ username, password });
     const { token, ...userData } = response.data;
@@ -79,7 +69,6 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
-    register,
     login,
     logout,
     updateUser,

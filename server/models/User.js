@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false // Don't include password in queries by default
   },
+  // Flag to indicate if user must change their default password
+  mustChangePassword: {
+    type: Boolean,
+    default: true
+  },
   // Reference to the seat booked by this user (null if none)
   bookedSeat: {
     type: mongoose.Schema.Types.ObjectId,

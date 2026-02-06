@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
@@ -23,8 +23,13 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(username, password);
-      navigate('/');
+      const userData = await login(username, password);
+      // Redirect based on whether password change is required
+      if (userData.mustChangePassword) {
+        navigate('/change-password');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
@@ -86,8 +91,9 @@ const Login = () => {
         </form>
 
         <div className="auth-footer">
-          Don't have an account?{' '}
-          <Link to="/register">Create one</Link>
+          <p className="login-hint">
+            First time? Use the default password provided by your administrator.
+          </p>
         </div>
       </div>
     </div>

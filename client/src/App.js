@@ -7,31 +7,70 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
-import Register from './pages/Register';
+import ChangePassword from './pages/ChangePassword';
 import './App.css';
 
 // Protected route wrapper - redirects to login if not authenticated
+// Also redirects to change-password if user must change password
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   
   if (loading) {
     return <div className="loading-screen">Loading...</div>;
   }
   
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  // Force password change for first-time users
+  if (user?.mustChangePassword) {
+    return <Navigate to="/change-password" />;
+  }
+  
+  return children;
 };
 
 // Guest route wrapper - redirects to home if already authenticated
 const GuestRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   
   if (loading) {
     return <div className="loading-screen">Loading...</div>;
   }
   
-  return !isAuthenticated ? children : <Navigate to="/" />;
+  if (isAuthenticated) {
+    // If authenticated but must change password, redirect there first
+    if (user?.mustChangePassword) {
+      return <Navigate to="/change-password" />;
+    }
+    return <Navigate to="/" />;
+  }
+  
+  return children;
+};
+
+// Password change route - only for authenticated users who must change password
+const PasswordChangeRoute = ({ children }) => {
+  const { isAuthenticated, loading, user } = useAuth();
+  
+  if (loading) {
+    return <div className="loading-screen">Loading...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  // If password already changed, redirect to home
+  if (!user?.mustChangePassword) {
+    return <Navigate to="/" />;
+  }
+  
+  return children;
 };
 
 function AppContent() {
@@ -41,10 +80,10 @@ function AppContent() {
         <Navbar />
         <main className="main-content">
           <Routes>
-            {/* Home page - accessible to all */}
+            {/* Home page - accessible to all (guests can view, but not book) */}
             <Route path="/" element={<Home />} />
             
-            {/* Auth pages - only for guests */}
+            {/* Login page - only for guests */}
             <Route
               path="/login"
               element={
@@ -53,12 +92,14 @@ function AppContent() {
                 </GuestRoute>
               }
             />
+            
+            {/* Change password - only for authenticated users who must change password */}
             <Route
-              path="/register"
+              path="/change-password"
               element={
-                <GuestRoute>
-                  <Register />
-                </GuestRoute>
+                <PasswordChangeRoute>
+                  <ChangePassword />
+                </PasswordChangeRoute>
               }
             />
             
@@ -66,6 +107,7 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </Router>
   );

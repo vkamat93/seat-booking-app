@@ -18,6 +18,9 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  // Don't show full navbar if user must change password
+  const showFullNav = isAuthenticated && !user?.mustChangePassword;
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -29,20 +32,19 @@ const Navbar = () => {
         <div className="navbar-menu">
           {isAuthenticated ? (
             <>
-              <span className="navbar-user">
-                Welcome, <strong>{user.username}</strong>
-              </span>
+              {showFullNav && (
+                <span className="navbar-user">
+                  Welcome, <strong>{user.username}</strong>
+                </span>
+              )}
               <button onClick={handleLogout} className="btn btn-logout">
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="btn btn-secondary">
+              <Link to="/login" className="btn btn-primary">
                 Login
-              </Link>
-              <Link to="/register" className="btn btn-primary">
-                Register
               </Link>
             </>
           )}

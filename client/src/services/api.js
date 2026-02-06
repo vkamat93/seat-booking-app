@@ -24,9 +24,16 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Don't redirect if we're on the login page or if this is a login/change-password request
+      // Let the login/change-password components handle their own error display
+      const isAuthRequest = error.config?.url?.includes('/auth/login') || 
+                            error.config?.url?.includes('/auth/change-password');
+      
+      if (!isAuthRequest) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -34,9 +41,9 @@ API.interceptors.response.use(
 
 // Auth API calls
 export const authAPI = {
-  register: (userData) => API.post('/auth/register', userData),
   login: (credentials) => API.post('/auth/login', credentials),
-  getMe: () => API.get('/auth/me')
+  getMe: () => API.get('/auth/me'),
+  changePassword: (passwords) => API.post('/auth/change-password', passwords)
 };
 
 // Seats API calls
