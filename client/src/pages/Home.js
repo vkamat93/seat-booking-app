@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { seatsAPI } from '../services/api';
 import SeatGrid from '../components/SeatGrid';
 import './Home.css';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();
@@ -94,7 +95,7 @@ const Home = () => {
         {!isAuthenticated && (
           <div className="info-banner">
             <span>ℹ️</span>
-            Please <a href="/login">login</a> to book a desk
+            Please <Link to="/login">login</Link> to book a desk
           </div>
         )}
 
