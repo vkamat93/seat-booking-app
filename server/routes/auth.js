@@ -38,13 +38,13 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Please provide username and password' });
     }
 
-    // Check if username is in the allowed list
+    // Check if username is in the allowed list (case-sensitive)
     if (!isUsernameAllowed(username)) {
       return res.status(403).json({ message: 'Username not authorized. Please contact administrator.' });
     }
 
     // Find user by username (include password for comparison)
-    let user = await User.findOne({ username: username.toLowerCase() }).select('+password');
+    let user = await User.findOne({ username }).select('+password');
 
     // If user doesn't exist and username is allowed, auto-create with default password
     if (!user) {
@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
       
       // Create new user with their unique default password
       user = await User.create({
-        username: username.toLowerCase(),
+        username,
         password: defaultPassword,
         mustChangePassword: true
       });

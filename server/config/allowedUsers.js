@@ -25,26 +25,28 @@ const parseCredentials = () => {
 };
 
 const USER_CREDENTIALS = parseCredentials();
+console.log("USER_CREDENTIALS" + USER_CREDENTIALS)
 
 // Extract allowed usernames from credentials
 const ALLOWED_USERNAMES = Object.keys(USER_CREDENTIALS);
+console.log("ALLOWED_USERNAMES: " + ALLOWED_USERNAMES)
 
 /**
  * Check if a username is allowed to register/login
  * @param {string} username - Username to check
- * @returns {boolean} - True if username is allowed
+ * @returns {boolean} - True if username is allowed (case-sensitive)
  */
 const isUsernameAllowed = (username) => {
-  return ALLOWED_USERNAMES.includes(username.toLowerCase());
+  return ALLOWED_USERNAMES.includes(username);
 };
 
 /**
  * Get the default password for a specific user
  * @param {string} username - Username to get password for
- * @returns {string|null} - Default password or null if user not found
+ * @returns {string|null} - Default password or null if user not found (case-sensitive)
  */
 const getDefaultPassword = (username) => {
-  return USER_CREDENTIALS[username.toLowerCase()] || null;
+  return USER_CREDENTIALS[username] || null;
 };
 
 module.exports = {

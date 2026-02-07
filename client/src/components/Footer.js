@@ -11,7 +11,8 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         <span className="footer-text">
-          Made with <span className="heart">❤</span> by Connected Vehicle Unit
+          Made by Vikrant & Ashish 🤓
+          <p>----Connected Vehicle----</p>
         </span>
       </div>
     </footer>
