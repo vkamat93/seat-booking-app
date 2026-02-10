@@ -11,8 +11,10 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         <span className="footer-text">
-          Made by Vikrant & Ashish 🤓
-          <p>----Connected Vehicle----</p>
+          🛠️ Built by Vikrant & Ashish 🤓
+        </span>
+        <span className="footer-divider">
+          ⚡ Connected Vehicle ⚡
         </span>
       </div>
     </footer>

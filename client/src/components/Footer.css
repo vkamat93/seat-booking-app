@@ -13,14 +13,24 @@
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 4px;
 }
 
 .footer-text {
   color: #a0a0a0;
   font-size: 0.85rem;
   letter-spacing: 0.3px;
+}
+
+.footer-divider {
+  color: #4cc9f0;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
 }
 
 .footer-text .heart {
@@ -47,6 +57,10 @@
   .footer-text {
     font-size: 0.8rem;
   }
+
+  .footer-divider {
+    font-size: 0.7rem;
+  }
 }
 
 /* Mobile */
@@ -57,5 +71,9 @@
 
   .footer-text {
     font-size: 0.75rem;
+  }
+
+  .footer-divider {
+    font-size: 0.65rem;
   }
 }

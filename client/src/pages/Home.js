@@ -9,6 +9,7 @@ import { seatsAPI } from '../services/api';
 import SeatGrid from '../components/SeatGrid';
 import './Home.css';
 import { Link } from 'react-router-dom';
+import { formattedCustomDate } from '../utils/currentDateDay';
 
 const Home = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();
@@ -89,8 +90,8 @@ const Home = () => {
   return (
     <div className="home-container">
       <div className="home-header">
-        <h1>🚘Connected Vehicle Desk Booking🚘</h1>
-        <p>Reserve your workspace for the day</p>
+        <h1>👨🏻‍💻Connected Vehicle Desk Booking👩🏻‍💻</h1>
+        <p>Reserve your workspace for {formattedCustomDate}</p>
         
         {!isAuthenticated && (
           <div className="info-banner">
