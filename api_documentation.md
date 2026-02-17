@@ -108,9 +108,15 @@ Retrieve high-level summary statistics for the admin dashboard.
 | Code | Status | Meaning |
 |------|--------|---------|
 | `ERR_INVALID_CREDENTIALS` | 401 | Incorrect username or password |
+| `ERR_MISSING_CREDENTIALS` | 400 | Login: Username or password not provided |
+| `ERR_CHANGE_PASS_FIELDS_MISSING` | 400 | Pass Change: Current or new password missing |
+| `ERR_CHANGE_PASS_TOO_SHORT` | 400 | Pass Change: New password < 6 characters |
 | `ERR_UNAUTHORIZED` | 403 / 401 | Not authorized to access this resource |
 | `ERR_RESOURCE_NOT_FOUND` | 404 | The requested item does not exist |
-| `ERR_VALIDATION_FAILED` | 400 | Missing or invalid request data |
-| `ERR_SEAT_TAKEN` | 400 | The seat is already booked for this date |
-| `ERR_CONFLICT` | 400 | Operation conflicts with existing data (e.g. perpetual vs manual) |
+| `ERR_MANUAL_BOOKING_DATE_MISSING` | 400 | Admin Manual: No dates provided in request |
+| `ERR_STATS_MONTH_MISSING` | 400 | Admin Stats: Month query parameter missing |
+| `ERR_SEAT_ALREADY_BOOKED` | 400 | Booking: The seat is already booked for this date |
+| `ERR_PERPETUAL_BOOKING_CONFLICT` | 400 | Admin Perpetual: Seat has existing future bookings |
+| `ERR_USER_ALREADY_HAS_SEAT` | 400 | Booking: User already has a seat booked for today |
+| `ERR_USER_EXISTS` | 400 | Admin: Username is already taken |
 | `ERR_SERVER_ERROR` | 500 | An unexpected internal server error occurred |

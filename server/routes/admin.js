@@ -363,7 +363,7 @@ router.post('/bookings/perpetual', async (req, res) => {
         });
 
         if (futureBookings) {
-            return res.error('Cannot make seat perpetual: it has existing future bookings.', 'ERR_CONFLICT', 400);
+            return res.error('Cannot make seat perpetual: it has existing future bookings.', 'ERR_PERPETUAL_BOOKING_CONFLICT', 400);
         }
 
         seat.isPermanent = true;
@@ -422,7 +422,7 @@ router.post('/bookings/manual', async (req, res) => {
         const { userId, seatId, dates } = req.body; // dates is an array of ISO strings
 
         if (!dates || !Array.isArray(dates) || dates.length === 0) {
-            return res.error('No dates provided', 'ERR_VALIDATION_FAILED', 400);
+            return res.error('No dates provided', 'ERR_MANUAL_BOOKING_DATE_MISSING', 400);
         }
 
         const results = [];
@@ -565,7 +565,7 @@ router.get('/users/:id/stats', async (req, res) => {
         const { month } = req.query; // YYYY-MM
         const userId = req.params.id;
 
-        if (!month) return res.error('Month is required', 'ERR_VALIDATION_FAILED', 400);
+        if (!month) return res.error('Month is required', 'ERR_STATS_MONTH_MISSING', 400);
 
         const [year, monthVal] = month.split('-').map(Number);
         const { getISTMonthBoundaries } = require('../utils/dateUtils');

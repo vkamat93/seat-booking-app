@@ -125,11 +125,11 @@ router.post('/change-password', protect, async (req, res) => {
 
     // Validate input
     if (!currentPassword || !newPassword) {
-      return res.error('Please provide current and new password', 'ERR_VALIDATION_FAILED', 400);
+      return res.error('Please provide current and new password', 'ERR_CHANGE_PASS_FIELDS_MISSING', 400);
     }
 
     if (newPassword.length < 6) {
-      return res.error('New password must be at least 6 characters', 'ERR_VALIDATION_FAILED', 400);
+      return res.error('New password must be at least 6 characters', 'ERR_CHANGE_PASS_TOO_SHORT', 400);
     }
 
     // Get user with password

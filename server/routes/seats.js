@@ -64,7 +64,7 @@ router.post('/book/:seatId', protect, async (req, res) => {
 
     if (seat.status === 'booked') {
       await session.abortTransaction();
-      return res.error('This seat is already booked', 'ERR_SEAT_TAKEN', 400);
+      return res.error('This seat is already booked', 'ERR_SEAT_ALREADY_BOOKED', 400);
     }
 
     // Book the seat
