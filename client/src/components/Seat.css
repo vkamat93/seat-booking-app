@@ -1,0 +1,129 @@
+/**
+ * Office Desk Styles - Compact for new layout
+ */
+
+.seat {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  font-weight: 600;
+  /* Prevent text selection on mobile */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Better touch targets */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Free seat - green */
+.seat-free {
+  background-color: #22c55e;
+  border-color: #16a34a;
+  color: #fff;
+}
+
+.seat-free:hover {
+  background-color: #16a34a;
+  transform: scale(1.05);
+}
+
+/* Booked seat - red */
+.seat-booked {
+  background-color: #ef4444;
+  border-color: #dc2626;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* User's seat - blue */
+.seat-user {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.seat-user:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
+}
+
+/* Disabled state */
+.seat-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.seat:disabled {
+  cursor: not-allowed;
+}
+
+.seat:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Tablet breakpoint */
+@media (max-width: 768px) {
+  .seat {
+    width: 50px;
+    height: 50px;
+    font-size: 0.8rem;
+    border-radius: 5px;
+  }
+}
+
+/* Mobile breakpoint */
+@media (max-width: 520px) {
+  .seat {
+    width: 40px;
+    height: 40px;
+    font-size: 0.7rem;
+    border-width: 1.5px;
+    border-radius: 4px;
+  }
+  
+  /* Disable hover effects on touch devices */
+  .seat-free:hover,
+  .seat-user:hover {
+    transform: none;
+  }
+  
+  /* Use active state instead for touch feedback */
+  .seat-free:active {
+    background-color: #16a34a;
+    transform: scale(0.95);
+  }
+  
+  .seat-user:active {
+    background-color: #2563eb;
+    transform: scale(0.95);
+  }
+}
+
+/* Small mobile breakpoint */
+@media (max-width: 380px) {
+  .seat {
+    width: 36px;
+    height: 36px;
+    font-size: 0.65rem;
+    border-radius: 4px;
+  }
+}
+
+/* Extra small mobile */
+@media (max-width: 340px) {
+  .seat {
+    width: 32px;
+    height: 32px;
+    font-size: 0.6rem;
+    border-width: 1px;
+    border-radius: 3px;
+  }
+}
