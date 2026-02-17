@@ -54,7 +54,7 @@ router.get('/stats', async (req, res) => {
         });
     } catch (error) {
         console.error('Admin stats error:', error);
-        res.error('Server error fetching stats', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error fetching stats', 'ERR_ADMIN_STATS_SERVER_ERROR', 500);
     }
 });
 
@@ -138,7 +138,7 @@ router.get('/users', async (req, res) => {
         });
     } catch (error) {
         console.error('Admin users error:', error);
-        res.error('Server error fetching users', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error fetching users', 'ERR_ADMIN_USERS_FETCH_SERVER_ERROR', 500);
     }
 });
 
@@ -169,7 +169,7 @@ router.post('/users', async (req, res) => {
         }, 'User created successfully', 'SUCCESS'); // Status 201 handled via JSON code if needed, but HTTP returns 200 by default here.
     } catch (error) {
         console.error('Admin create user error:', error);
-        res.error('Server error creating user', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error creating user', 'ERR_ADMIN_USER_CREATE_SERVER_ERROR', 500);
     }
 });
 
@@ -183,7 +183,7 @@ router.put('/users/:id', async (req, res) => {
         const user = await User.findById(req.params.id);
 
         if (!user) {
-            return res.error('User not found', 'ERR_RESOURCE_NOT_FOUND', 404);
+            return res.error('User not found', 'ERR_ADMIN_USER_UPDATE_NOT_FOUND', 404);
         }
 
         if (role) user.role = role;
@@ -193,7 +193,7 @@ router.put('/users/:id', async (req, res) => {
         res.success(user, 'User updated successfully');
     } catch (error) {
         console.error('Admin update user error:', error);
-        res.error('Server error updating user', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error updating user', 'ERR_ADMIN_USER_UPDATE_SERVER_ERROR', 500);
     }
 });
 
@@ -205,7 +205,7 @@ router.delete('/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.error('User not found', 'ERR_RESOURCE_NOT_FOUND', 404);
+            return res.error('User not found', 'ERR_ADMIN_USER_DELETE_NOT_FOUND', 404);
         }
 
         user.isDeleted = true;
@@ -214,7 +214,7 @@ router.delete('/users/:id', async (req, res) => {
         res.success(null, 'User deleted successfully');
     } catch (error) {
         console.error('Admin delete user error:', error);
-        res.error('Server error deleting user', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error deleting user', 'ERR_ADMIN_USER_DELETE_SERVER_ERROR', 500);
     }
 });
 
@@ -226,7 +226,7 @@ router.put('/users/:id/reset-password', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.error('User not found', 'ERR_RESOURCE_NOT_FOUND', 404);
+            return res.error('User not found', 'ERR_ADMIN_USER_PASSWORD_RESET_NOT_FOUND', 404);
         }
 
         // Generate a random 8-character temporary password
@@ -242,7 +242,7 @@ router.put('/users/:id/reset-password', async (req, res) => {
         }, 'Password reset successfully');
     } catch (error) {
         console.error('Admin reset password error:', error);
-        res.error('Server error resetting password', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error resetting password', 'ERR_ADMIN_USER_PASSWORD_RESET_SERVER_ERROR', 500);
     }
 });
 
@@ -298,7 +298,7 @@ router.get('/bookings', async (req, res) => {
         res.success(bookings);
     } catch (error) {
         console.error('Admin bookings error:', error);
-        res.error('Server error fetching bookings', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error fetching bookings', 'ERR_ADMIN_BOOKINGS_FETCH_SERVER_ERROR', 500);
     }
 });
 
@@ -323,7 +323,7 @@ router.get('/bookings/future', async (req, res) => {
         res.success(bookings);
     } catch (error) {
         console.error('Admin future bookings error:', error);
-        res.error('Server error fetching future bookings', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error fetching future bookings', 'ERR_ADMIN_BOOKINGS_FUTURE_SERVER_ERROR', 500);
     }
 });
 
@@ -338,7 +338,7 @@ router.get('/bookings/perpetual', async (req, res) => {
         res.success(perpetualSeats);
     } catch (error) {
         console.error('Admin perpetual seats error:', error);
-        res.error('Server error fetching perpetual seats', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error fetching perpetual seats', 'ERR_ADMIN_BOOKINGS_PERPETUAL_FETCH_SERVER_ERROR', 500);
     }
 });
 
@@ -351,7 +351,7 @@ router.post('/bookings/perpetual', async (req, res) => {
         const { userId, seatId } = req.body;
 
         const seat = await Seat.findById(seatId);
-        if (!seat) return res.error('Seat not found', 'ERR_RESOURCE_NOT_FOUND', 404);
+        if (!seat) return res.error('Seat not found', 'ERR_ADMIN_PERPETUAL_BOOKING_SEAT_NOT_FOUND', 404);
 
         // Validation: Check for future scheduled bookings
         const { getISTDayStart } = require('../utils/dateUtils');
@@ -379,7 +379,7 @@ router.post('/bookings/perpetual', async (req, res) => {
         res.success(seat, 'Seat assigned permanently');
     } catch (error) {
         console.error('Admin perpetual booking error:', error);
-        res.error('Server error creating perpetual booking', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error creating perpetual booking', 'ERR_ADMIN_PERPETUAL_BOOKING_CREATE_SERVER_ERROR', 500);
     }
 });
 
@@ -390,7 +390,7 @@ router.post('/bookings/perpetual', async (req, res) => {
 router.delete('/bookings/perpetual/:seatId', async (req, res) => {
     try {
         const seat = await Seat.findById(req.params.seatId);
-        if (!seat) return res.error('Seat not found', 'ERR_RESOURCE_NOT_FOUND', 404);
+        if (!seat) return res.error('Seat not found', 'ERR_ADMIN_PERPETUAL_BOOKING_DELETE_NOT_FOUND', 404);
 
         const userId = seat.permanentUser;
 
@@ -409,7 +409,7 @@ router.delete('/bookings/perpetual/:seatId', async (req, res) => {
         res.success(null, 'Perpetual status removed');
     } catch (error) {
         console.error('Admin delete perpetual error:', error);
-        res.error('Server error removing perpetual status', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error removing perpetual status', 'ERR_ADMIN_PERPETUAL_BOOKING_DELETE_SERVER_ERROR', 500);
     }
 });
 
@@ -468,7 +468,7 @@ router.post('/bookings/manual', async (req, res) => {
         }, `Created ${results.length} bookings. ${errors.length} conflicts found.`);
     } catch (error) {
         console.error('Admin manual booking error:', error);
-        res.error('Server error creating manual bookings', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error creating manual bookings', 'ERR_ADMIN_BOOKINGS_MANUAL_SERVER_ERROR', 500);
     }
 });
 
@@ -552,7 +552,7 @@ router.post('/bookings/release', async (req, res) => {
         res.success({ count: result.modifiedCount }, `${result.modifiedCount} bookings released successfully.`);
     } catch (error) {
         console.error('Admin mass release error:', error);
-        res.error('Server error during mass release', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error during mass release', 'ERR_ADMIN_BOOKINGS_MASS_RELEASE_SERVER_ERROR', 500);
     }
 });
 
@@ -610,7 +610,7 @@ router.get('/users/:id/stats', async (req, res) => {
         });
     } catch (error) {
         console.error('Admin user stats error:', error);
-        res.error('Server error fetching user stats', 'ERR_SERVER_ERROR', 500);
+        res.error('Server error fetching user stats', 'ERR_ADMIN_USER_STATS_SERVER_ERROR', 500);
     }
 });
 

@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
     res.success(seats);
   } catch (error) {
     console.error('Error fetching seats:', error);
-    res.error('Server error fetching seats', 'ERR_SERVER_ERROR', 500);
+    res.error('Server error fetching seats', 'ERR_SEATS_FETCH_SERVER_ERROR', 500);
   }
 });
 
@@ -59,7 +59,7 @@ router.post('/book/:seatId', protect, async (req, res) => {
 
     if (!seat) {
       await session.abortTransaction();
-      return res.error('Seat not found', 'ERR_RESOURCE_NOT_FOUND', 404);
+      return res.error('Seat not found', 'ERR_BOOKING_SEAT_NOT_FOUND', 404);
     }
 
     if (seat.status === 'booked') {
@@ -100,7 +100,7 @@ router.post('/book/:seatId', protect, async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     console.error('Booking error:', error);
-    res.error('Server error during booking', 'ERR_SERVER_ERROR', 500);
+    res.error('Server error during booking', 'ERR_SEATS_BOOK_SERVER_ERROR', 500);
   } finally {
     session.endSession();
   }
@@ -167,7 +167,7 @@ router.post('/release', protect, async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     console.error('Release error:', error);
-    res.error('Server error during seat release', 'ERR_SERVER_ERROR', 500);
+    res.error('Server error during seat release', 'ERR_SEATS_RELEASE_SERVER_ERROR', 500);
   } finally {
     session.endSession();
   }

@@ -105,18 +105,58 @@ Retrieve high-level summary statistics for the admin dashboard.
 
 ## Error Codes
 
+The system uses specific, unique error codes for every failure scenario to aid in diagnostics.
+
+### Authentication & Authorization
 | Code | Status | Meaning |
 |------|--------|---------|
-| `ERR_INVALID_CREDENTIALS` | 401 | Incorrect username or password |
-| `ERR_MISSING_CREDENTIALS` | 400 | Login: Username or password not provided |
-| `ERR_CHANGE_PASS_FIELDS_MISSING` | 400 | Pass Change: Current or new password missing |
-| `ERR_CHANGE_PASS_TOO_SHORT` | 400 | Pass Change: New password < 6 characters |
-| `ERR_UNAUTHORIZED` | 403 / 401 | Not authorized to access this resource |
-| `ERR_RESOURCE_NOT_FOUND` | 404 | The requested item does not exist |
-| `ERR_MANUAL_BOOKING_DATE_MISSING` | 400 | Admin Manual: No dates provided in request |
-| `ERR_STATS_MONTH_MISSING` | 400 | Admin Stats: Month query parameter missing |
-| `ERR_SEAT_ALREADY_BOOKED` | 400 | Booking: The seat is already booked for this date |
-| `ERR_PERPETUAL_BOOKING_CONFLICT` | 400 | Admin Perpetual: Seat has existing future bookings |
-| `ERR_USER_ALREADY_HAS_SEAT` | 400 | Booking: User already has a seat booked for today |
-| `ERR_USER_EXISTS` | 400 | Admin: Username is already taken |
-| `ERR_SERVER_ERROR` | 500 | An unexpected internal server error occurred |
+| `ERR_LOGIN_MISSING_CREDENTIALS` | 400 | Login: Username or password not provided |
+| `ERR_AUTH_USERNAME_UNAUTHORIZED` | 403 | Username is not in the allowed list |
+| `ERR_LOGIN_INVALID_DEFAULT_PASSWORD` | 401 | First login: Incorrect default password |
+| `ERR_LOGIN_INVALID_CREDENTIALS` | 401 | Incorrect password for existing user |
+| `ERR_CHANGE_PASS_FIELDS_MISSING` | 400 | Current or new password missing |
+| `ERR_CHANGE_PASS_TOO_SHORT` | 400 | New password is less than 6 characters |
+| `ERR_INVALID_PASSWORD` | 401 | Current password provided is incorrect |
+| `ERR_UNAUTHORIZED` | 401/403 | Generic authorization failure |
+| `ERR_AUTH_LOGIN_SERVER_ERROR` | 500 | Server error during login process |
+| `ERR_AUTH_ME_SERVER_ERROR` | 500 | Server error fetching user profile |
+| `ERR_AUTH_CHANGE_PASSWORD_SERVER_ERROR` | 500 | Server error changing password |
+
+### Seat Operations (User)
+| Code | Status | Meaning |
+|------|--------|---------|
+| `ERR_USER_ALREADY_HAS_SEAT` | 400 | User already has a seat booked for today |
+| `ERR_BOOKING_SEAT_NOT_FOUND` | 404 | The requested seat could not be found |
+| `ERR_SEAT_ALREADY_BOOKED` | 400 | The seat is already taken for the requested date |
+| `ERR_NO_SEAT_TO_RELEASE` | 400 | User has no active seat to release |
+| `ERR_SEATS_FETCH_SERVER_ERROR` | 500 | Server error retrieving seat list |
+| `ERR_SEATS_BOOK_SERVER_ERROR` | 500 | Server error during booking transaction |
+| `ERR_SEATS_RELEASE_SERVER_ERROR` | 500 | Server error during release transaction |
+
+### Admin Operations
+| Code | Status | Meaning |
+|------|--------|---------|
+| `ERR_USER_EXISTS` | 400 | Username already exists in the system |
+| `ERR_ADMIN_USER_UPDATE_NOT_FOUND` | 404 | User to update does not exist |
+| `ERR_ADMIN_USER_DELETE_NOT_FOUND` | 404 | User to delete does not exist |
+| `ERR_ADMIN_USER_PASSWORD_RESET_NOT_FOUND` | 404 | User for password reset not found |
+| `ERR_ADMIN_PERPETUAL_BOOKING_SEAT_NOT_FOUND` | 404 | Seat for perpetual assignment not found |
+| `ERR_PERPETUAL_BOOKING_CONFLICT` | 400 | Seat has existing future bookings |
+| `ERR_ADMIN_PERPETUAL_BOOKING_DELETE_NOT_FOUND` | 404 | Perpetual seat for removal not found |
+| `ERR_MANUAL_BOOKING_DATE_MISSING` | 400 | No dates provided for manual booking |
+| `ERR_STATS_MONTH_MISSING` | 400 | Month parameter missing for user stats |
+| `ERR_ADMIN_STATS_SERVER_ERROR` | 500 | Server error fetching dashboard stats |
+| `ERR_ADMIN_USERS_FETCH_SERVER_ERROR` | 500 | Server error fetching user list |
+| `ERR_ADMIN_USER_CREATE_SERVER_ERROR` | 500 | Server error during user creation |
+| `ERR_ADMIN_USER_UPDATE_SERVER_ERROR` | 500 | Server error during user update |
+| `ERR_ADMIN_USER_DELETE_SERVER_ERROR` | 500 | Server error during user deletion |
+| `ERR_ADMIN_USER_PASSWORD_RESET_SERVER_ERROR` | 500 | Server error during password reset |
+| `ERR_ADMIN_BOOKINGS_FETCH_SERVER_ERROR` | 500 | Server error fetching booking history |
+| `ERR_ADMIN_BOOKINGS_FUTURE_SERVER_ERROR` | 500 | Server error fetching scheduled bookings |
+| `ERR_ADMIN_BOOKINGS_PERPETUAL_FETCH_SERVER_ERROR` | 500 | Server error fetching perpetual list |
+| `ERR_ADMIN_PERPETUAL_BOOKING_CREATE_SERVER_ERROR` | 500 | Server error creating perpetual assignment |
+| `ERR_ADMIN_PERPETUAL_BOOKING_DELETE_SERVER_ERROR` | 500 | Server error removing perpetual status |
+| `ERR_ADMIN_BOOKINGS_MANUAL_SERVER_ERROR` | 500 | Server error creating manual bookings |
+| `ERR_ADMIN_BOOKINGS_MASS_RELEASE_SERVER_ERROR` | 500 | Server error during mass release |
+| `ERR_ADMIN_USER_STATS_SERVER_ERROR` | 500 | Server error fetching user monthly stats |
+| `ERR_SERVER_ERROR` | 500 | Generic unhandled server error |

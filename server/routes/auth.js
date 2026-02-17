@@ -35,12 +35,12 @@ router.post('/login', async (req, res) => {
 
     // Validate input
     if (!username || !password) {
-      return res.error('Please provide username and password', 'ERR_MISSING_CREDENTIALS', 400);
+      return res.error('Please provide username and password', 'ERR_LOGIN_MISSING_CREDENTIALS', 400);
     }
 
     // Check if username is in the allowed list (case-sensitive)
     if (!isUsernameAllowed(username)) {
-      return res.error('Username not authorized. Please contact administrator.', 'ERR_UNAUTHORIZED', 403);
+      return res.error('Username not authorized. Please contact administrator.', 'ERR_AUTH_USERNAME_UNAUTHORIZED', 403);
     }
 
     // Find user by username (include password for comparison)
@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
 
       // Only allow login with the user's default password for new users
       if (password !== defaultPassword) {
-        return res.error('Invalid credentials', 'ERR_INVALID_CREDENTIALS', 401);
+        return res.error('Invalid credentials', 'ERR_LOGIN_INVALID_DEFAULT_PASSWORD', 401);
       }
 
       // Create new user with their unique default password
@@ -71,7 +71,7 @@ router.post('/login', async (req, res) => {
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      return res.error('Invalid credentials', 'ERR_INVALID_CREDENTIALS', 401);
+      return res.error('Invalid credentials', 'ERR_LOGIN_INVALID_CREDENTIALS', 401);
     }
 
     // Generate token and respond
@@ -87,7 +87,7 @@ router.post('/login', async (req, res) => {
     }, 'Login successful');
   } catch (error) {
     console.error('Login error:', error);
-    res.error('Server error during login', 'ERR_SERVER_ERROR', 500);
+    res.error('Server error during login', 'ERR_AUTH_LOGIN_SERVER_ERROR', 500);
   }
 });
 
@@ -110,7 +110,7 @@ router.get('/me', protect, async (req, res) => {
     });
   } catch (error) {
     console.error('Get user error:', error);
-    res.error('Server error', 'ERR_SERVER_ERROR', 500);
+    res.error('Server error', 'ERR_AUTH_ME_SERVER_ERROR', 500);
   }
 });
 
@@ -151,7 +151,7 @@ router.post('/change-password', protect, async (req, res) => {
     }, 'Password changed successfully');
   } catch (error) {
     console.error('Change password error:', error);
-    res.error('Server error during password change', 'ERR_SERVER_ERROR', 500);
+    res.error('Server error during password change', 'ERR_AUTH_CHANGE_PASSWORD_SERVER_ERROR', 500);
   }
 });
 
