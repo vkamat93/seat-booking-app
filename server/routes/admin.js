@@ -8,6 +8,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Seat = require('../models/Seat');
 const Booking = require('../models/Booking');
+const { parseDateToISTDayStart } = require('../utils/dateUtils');
 const { protect, admin } = require('../middleware/auth');
 
 // Apply admin protection to all routes in this file
@@ -21,8 +22,8 @@ router.use(admin);
 router.get('/stats', async (req, res) => {
     try {
         const totalUsers = await User.countDocuments({ isDeleted: { $ne: true } });
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const { getISTDayStart } = require('../utils/dateUtils');
+        const today = getISTDayStart();
         const seatsBookedToday = await Booking.countDocuments({
             date: today,
             status: 'booked'
@@ -32,9 +33,9 @@ router.get('/stats', async (req, res) => {
         const availableSeatsToday = await Seat.countDocuments({ status: 'free' });
 
         // Bookings this month
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
+        const now = new Date();
+        const { getISTMonthBoundaries } = require('../utils/dateUtils');
+        const { start: startOfMonth } = getISTMonthBoundaries(now.getFullYear(), now.getMonth() + 1);
 
         const totalBookingsMonth = await Booking.countDocuments({
             createdAt: { $gte: startOfMonth },
@@ -253,15 +254,11 @@ router.get('/bookings', async (req, res) => {
         if (startDate || endDate) {
             match.date = {};
             if (startDate) {
-                const [y, m, d] = startDate.split('-').map(Number);
-                const sDate = new Date(y, m - 1, d);
-                sDate.setHours(0, 0, 0, 0);
-                match.date.$gte = sDate;
+                match.date.$gte = parseDateToISTDayStart(startDate);
             }
             if (endDate) {
-                const [y, m, d] = endDate.split('-').map(Number);
-                const eDate = new Date(y, m - 1, d);
-                eDate.setHours(23, 59, 59, 999);
+                const eDate = parseDateToISTDayStart(endDate);
+                eDate.setUTCHours(23, 59, 59, 999);
                 match.date.$lte = eDate;
             }
         }
@@ -311,8 +308,9 @@ router.get('/bookings', async (req, res) => {
  */
 router.get('/bookings/future', async (req, res) => {
     try {
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
+        const { getISTDayStart } = require('../utils/dateUtils');
+        const today = getISTDayStart();
+        today.setUTCHours(23, 59, 59, 999);
 
         const bookings = await Booking.find({
             date: { $gt: today },
@@ -356,8 +354,8 @@ router.post('/bookings/perpetual', async (req, res) => {
         if (!seat) return res.error('Seat not found', 'ERR_RESOURCE_NOT_FOUND', 404);
 
         // Validation: Check for future scheduled bookings
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const { getISTDayStart } = require('../utils/dateUtils');
+        const today = getISTDayStart();
         const futureBookings = await Booking.findOne({
             seat: seatId,
             date: { $gte: today },
@@ -431,9 +429,8 @@ router.post('/bookings/manual', async (req, res) => {
         const errors = [];
 
         for (const dateStr of dates) {
-            const [y, m, d] = dateStr.split('-').map(Number);
-            const date = new Date(y, m - 1, d);
-            date.setHours(0, 0, 0, 0);
+            const date = parseDateToISTDayStart(dateStr);
+            if (!date) continue;
 
             // Validation: Check if seat is permanent
             const seat = await Seat.findById(seatId);
@@ -490,13 +487,9 @@ router.post('/bookings/release', async (req, res) => {
             if (userId) query.user = userId;
             if (seatId) query.seat = seatId;
             if (dateRange) {
-                const [sy, sm, sd] = dateRange.start.split('-').map(Number);
-                const sDate = new Date(sy, sm - 1, sd);
-                sDate.setHours(0, 0, 0, 0);
-
-                const [ey, em, ed] = dateRange.end.split('-').map(Number);
-                const eDate = new Date(ey, em - 1, ed);
-                eDate.setHours(23, 59, 59, 999);
+                const sDate = parseDateToISTDayStart(dateRange.start);
+                const eDate = parseDateToISTDayStart(dateRange.end);
+                eDate.setUTCHours(23, 59, 59, 999);
                 query.date = {
                     $gte: sDate,
                     $lte: eDate
@@ -514,8 +507,8 @@ router.post('/bookings/release', async (req, res) => {
         });
 
         // Also update current seat status if it was released for TODAY
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const { getISTDayStart } = require('../utils/dateUtils');
+        const today = getISTDayStart();
 
         // Find which bookings were for today and were just released
         // Status must be 'released' now. We don't use ...query because it contains status: 'booked'
@@ -575,8 +568,8 @@ router.get('/users/:id/stats', async (req, res) => {
         if (!month) return res.error('Month is required', 'ERR_VALIDATION_FAILED', 400);
 
         const [year, monthVal] = month.split('-').map(Number);
-        const startOfMonth = new Date(year, monthVal - 1, 1);
-        const endOfMonth = new Date(year, monthVal, 0, 23, 59, 59, 999);
+        const { getISTMonthBoundaries } = require('../utils/dateUtils');
+        const { start: startOfMonth, end: endOfMonth } = getISTMonthBoundaries(year, monthVal);
 
         const bookings = await Booking.find({
             user: userId,

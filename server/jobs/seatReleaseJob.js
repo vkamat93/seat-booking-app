@@ -8,6 +8,7 @@ const cron = require('node-cron');
 const Seat = require('../models/Seat');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
+const { getISTDayStart } = require('../utils/dateUtils');
 
 // Unit Titan who gets seat 495 automatically
 const AUTO_ALLOCATE_USERNAME = 'AbhishekSunder'; // Change this to the desired username
@@ -78,8 +79,7 @@ const applyScheduledBookings = async () => {
   console.log(`[${timestamp}] Starting application of scheduled bookings...`);
 
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getISTDayStart();
 
     // 1. Log permanent seats for today's stats
     const permanentSeats = await Seat.find({ isPermanent: true });

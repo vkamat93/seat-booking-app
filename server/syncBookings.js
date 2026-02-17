@@ -9,6 +9,7 @@ const User = require('./models/User');
 const Seat = require('./models/Seat');
 const Booking = require('./models/Booking');
 const connectDB = require('./config/db');
+const { getISTDayStart } = require('./utils/dateUtils');
 
 const syncBookings = async () => {
     try {
@@ -18,8 +19,7 @@ const syncBookings = async () => {
         const bookedSeats = await Seat.find({ status: 'booked' });
         console.log(`Found ${bookedSeats.length} active seat bookings.`);
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const today = getISTDayStart();
 
         let createdCount = 0;
         let skippedCount = 0;

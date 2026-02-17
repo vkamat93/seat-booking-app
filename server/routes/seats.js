@@ -9,6 +9,7 @@ const Seat = require('../models/Seat');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
 const { protect } = require('../middleware/auth');
+const { getISTDayStart } = require('../utils/dateUtils');
 
 const router = express.Router();
 
@@ -77,8 +78,7 @@ router.post('/book/:seatId', protect, async (req, res) => {
     await currentUser.save({ session });
 
     // Create a Booking record for today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getISTDayStart();
 
     await Booking.create([{
       user: userId,
@@ -137,8 +137,7 @@ router.post('/release', protect, async (req, res) => {
     }
 
     // Update the Booking record for today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getISTDayStart();
 
     await Booking.updateMany(
       {
