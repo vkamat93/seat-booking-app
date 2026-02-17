@@ -375,9 +375,13 @@ router.post('/bookings/release', async (req, res) => {
             if (userId) query.user = userId;
             if (seatId) query.seat = seatId;
             if (dateRange) {
+                const sDate = new Date(dateRange.start);
+                sDate.setHours(0, 0, 0, 0);
+                const eDate = new Date(dateRange.end);
+                eDate.setHours(23, 59, 59, 999);
                 query.date = {
-                    $gte: new Date(dateRange.start),
-                    $lte: new Date(dateRange.end)
+                    $gte: sDate,
+                    $lte: eDate
                 };
             }
         }
@@ -396,11 +400,20 @@ router.post('/bookings/release', async (req, res) => {
         today.setHours(0, 0, 0, 0);
 
         // Find which bookings were for today and were just released
-        const updatedBookings = await Booking.find({
-            ...query,
+        // Status must be 'released' now. We don't use ...query because it contains status: 'booked'
+        const releaseSearchQuery = {
             date: today,
             status: 'released'
-        });
+        };
+
+        if (bookingIds && Array.isArray(bookingIds) && bookingIds.length > 0) {
+            releaseSearchQuery._id = { $in: bookingIds };
+        } else {
+            if (userId) releaseSearchQuery.user = userId;
+            if (seatId) releaseSearchQuery.seat = seatId;
+        }
+
+        const updatedBookings = await Booking.find(releaseSearchQuery);
 
         if (updatedBookings.length > 0) {
             const seatIds = updatedBookings.map(b => b.seat);

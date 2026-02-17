@@ -5,11 +5,11 @@
 import React from 'react';
 import './Seat.css';
 
-const Seat = ({ seat, isUserSeat, onBook, onRelease, isAuthenticated }) => {
+const Seat = ({ seat, isUserSeat, onBook, onRelease, isAuthenticated, disabled }) => {
   const isBooked = seat.status === 'booked';
 
   const handleClick = () => {
-    if (!isAuthenticated) return; // Only authenticated users can book
+    if (!isAuthenticated || disabled) return; // Only authenticated users can book, and not while loading
 
     if (isUserSeat) {
       onRelease();
