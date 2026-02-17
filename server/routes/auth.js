@@ -35,12 +35,12 @@ router.post('/login', async (req, res) => {
 
     // Validate input
     if (!username || !password) {
-      return res.status(400).json({ message: 'Please provide username and password' });
+      return res.error('Please provide username and password', 'ERR_MISSING_CREDENTIALS', 400);
     }
 
     // Check if username is in the allowed list (case-sensitive)
     if (!isUsernameAllowed(username)) {
-      return res.status(403).json({ message: 'Username not authorized. Please contact administrator.' });
+      return res.error('Username not authorized. Please contact administrator.', 'ERR_UNAUTHORIZED', 403);
     }
 
     // Find user by username (include password for comparison)
@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
 
       // Only allow login with the user's default password for new users
       if (password !== defaultPassword) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        return res.error('Invalid credentials', 'ERR_INVALID_CREDENTIALS', 401);
       }
 
       // Create new user with their unique default password
@@ -71,23 +71,23 @@ router.post('/login', async (req, res) => {
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.error('Invalid credentials', 'ERR_INVALID_CREDENTIALS', 401);
     }
 
     // Generate token and respond
     const token = generateToken(user._id);
 
-    res.json({
+    res.success({
       _id: user._id,
       username: user.username,
       role: user.role,
       bookedSeat: user.bookedSeat,
       mustChangePassword: user.mustChangePassword,
       token
-    });
+    }, 'Login successful');
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error during login' });
+    res.error('Server error during login', 'ERR_SERVER_ERROR', 500);
   }
 });
 
@@ -101,7 +101,7 @@ router.get('/me', protect, async (req, res) => {
     // Get user with populated seat info
     const user = await User.findById(req.user._id).populate('bookedSeat');
 
-    res.json({
+    res.success({
       _id: user._id,
       username: user.username,
       role: user.role,
@@ -110,7 +110,7 @@ router.get('/me', protect, async (req, res) => {
     });
   } catch (error) {
     console.error('Get user error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.error('Server error', 'ERR_SERVER_ERROR', 500);
   }
 });
 
@@ -125,11 +125,11 @@ router.post('/change-password', protect, async (req, res) => {
 
     // Validate input
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: 'Please provide current and new password' });
+      return res.error('Please provide current and new password', 'ERR_VALIDATION_FAILED', 400);
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+      return res.error('New password must be at least 6 characters', 'ERR_VALIDATION_FAILED', 400);
     }
 
     // Get user with password
@@ -138,7 +138,7 @@ router.post('/change-password', protect, async (req, res) => {
     // Verify current password
     const isMatch = await user.matchPassword(currentPassword);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Current password is incorrect' });
+      return res.error('Current password is incorrect', 'ERR_INVALID_PASSWORD', 401);
     }
 
     // Update password and set mustChangePassword to false
@@ -146,13 +146,12 @@ router.post('/change-password', protect, async (req, res) => {
     user.mustChangePassword = false;
     await user.save();
 
-    res.json({
-      message: 'Password changed successfully',
+    res.success({
       mustChangePassword: false
-    });
+    }, 'Password changed successfully');
   } catch (error) {
     console.error('Change password error:', error);
-    res.status(500).json({ message: 'Server error during password change' });
+    res.error('Server error during password change', 'ERR_SERVER_ERROR', 500);
   }
 });
 

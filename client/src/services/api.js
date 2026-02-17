@@ -64,7 +64,11 @@ export const adminAPI = {
   getBookings: (params) => API.get('/admin/bookings', { params }),
   createManualBookings: (data) => API.post('/admin/bookings/manual', data),
   releaseBookings: (data) => API.post('/admin/bookings/release', data),
-  getUserStats: (id, month) => API.get(`/admin/users/${id}/stats`, { params: { month } })
+  getUserStats: (id, month) => API.get(`/admin/users/${id}/stats`, { params: { month } }),
+  getFutureBookings: () => API.get('/admin/bookings/future'),
+  getPerpetualSeats: () => API.get('/admin/bookings/perpetual'),
+  createPerpetualBooking: (data) => API.post('/admin/bookings/perpetual', data),
+  deletePerpetualBooking: (seatId) => API.delete(`/admin/bookings/perpetual/${seatId}`)
 };
 
 export default API;

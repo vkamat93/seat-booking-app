@@ -20,7 +20,7 @@ const BookingManagement = () => {
                 sortBy: sortConfig.key,
                 order: sortConfig.direction
             });
-            setBookings(response.data);
+            setBookings(response.data.data);
         } catch (error) {
             console.error('Failed to fetch bookings:', error);
         } finally {
@@ -30,6 +30,10 @@ const BookingManagement = () => {
 
     useEffect(() => {
         fetchBookings();
+
+        // Refresh bookings every 10 seconds (Live Update)
+        const interval = setInterval(fetchBookings, 10000);
+        return () => clearInterval(interval);
     }, [filters, sortConfig]);
 
     const requestSort = (key) => {
@@ -54,7 +58,7 @@ const BookingManagement = () => {
         if (window.confirm(`Are you sure you want to release ${selectedBookings.length} selected bookings?`)) {
             try {
                 const result = await adminAPI.releaseBookings({ bookingIds: selectedBookings });
-                alert(`${result.data.count} bookings released.`);
+                alert(`${result.data.data.count} bookings released.`);
                 setSelectedBookings([]);
                 fetchBookings();
             } catch (error) {
@@ -70,7 +74,7 @@ const BookingManagement = () => {
                 const result = await adminAPI.releaseBookings({
                     dateRange: { start: today, end: today }
                 });
-                alert(`${result.data.count} seats cleared for today.`);
+                alert(`${result.data.data.count} seats cleared for today.`);
                 fetchBookings();
             } catch (error) {
                 alert('Failed to clear seats');
@@ -99,6 +103,9 @@ const BookingManagement = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', alignItems: 'center' }}>
                 <h1 style={{ color: '#1a202c', margin: 0 }}>Booking Management</h1>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button className="admin-btn" onClick={fetchBookings} disabled={loading}>
+                        {loading ? 'Refreshing...' : '🔄 Refresh'}
+                    </button>
                     <button
                         className="admin-btn"
                         style={{ background: '#718096', color: 'white' }}

@@ -24,7 +24,7 @@ const Home = () => {
     try {
       setLoading(true);
       const response = await seatsAPI.getAll();
-      setSeats(response.data);
+      setSeats(response.data.data);
       setError('');
     } catch (err) {
       setError('Desk layout not loaded. Please Login & try again.');
@@ -36,7 +36,7 @@ const Home = () => {
 
   useEffect(() => {
     fetchSeats();
-    
+
     // Refresh desks every 30 seconds
     const interval = setInterval(fetchSeats, 30000);
     return () => clearInterval(interval);
@@ -56,7 +56,7 @@ const Home = () => {
       setSuccess('Desk booked successfully!');
       await fetchSeats();
       await refreshUser();
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -75,7 +75,7 @@ const Home = () => {
       setSuccess('Desk released successfully!');
       await fetchSeats();
       await refreshUser();
-      
+
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to release desk');
@@ -92,7 +92,7 @@ const Home = () => {
       <div className="home-header">
         <h1>👨🏻‍💻Connected Vehicle Desk Booking👩🏻‍💻</h1>
         <p>Reserve your workspace for {formattedCustomDate}</p>
-        
+
         {!isAuthenticated && (
           <div className="info-banner">
             <span>ℹ️</span>

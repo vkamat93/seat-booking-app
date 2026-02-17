@@ -25,9 +25,9 @@ const UserManagement = () => {
                 sortBy: sortConfig.key,
                 order: sortConfig.direction
             });
-            setUsers(response.data.users);
-            setTotalPages(response.data.totalPages);
-            setTotalUsers(response.data.totalUsers);
+            setUsers(response.data.data.users);
+            setTotalPages(response.data.data.totalPages);
+            setTotalUsers(response.data.data.totalUsers);
         } catch (error) {
             console.error('Failed to fetch users:', error);
         } finally {
@@ -41,6 +41,10 @@ const UserManagement = () => {
 
     useEffect(() => {
         fetchUsers();
+
+        // Refresh users every 10 seconds (Live Update)
+        const interval = setInterval(fetchUsers, 10000);
+        return () => clearInterval(interval);
     }, [search, filters, page, sortConfig]);
 
     const handleCreateUser = async (e) => {
@@ -80,7 +84,7 @@ const UserManagement = () => {
         if (window.confirm('Are you sure you want to reset this user\'s password to a temporary one?')) {
             try {
                 const response = await adminAPI.resetPassword(id);
-                const { tempPassword, username } = response.data;
+                const { tempPassword, username } = response.data.data;
                 setResetModal({ show: true, username, tempPassword });
                 fetchUsers();
             } catch (error) {
@@ -134,11 +138,16 @@ const UserManagement = () => {
 
     return (
         <div className="user-management">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', alignItems: 'center' }}>
                 <h1>User Management</h1>
-                <button className="admin-btn admin-btn-primary" onClick={() => setShowModal(true)}>
-                    Create New User
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button className="admin-btn" onClick={fetchUsers} disabled={loading}>
+                        {loading ? 'Refreshing...' : '🔄 Refresh'}
+                    </button>
+                    <button className="admin-btn admin-btn-primary" onClick={() => setShowModal(true)}>
+                        Create New User
+                    </button>
+                </div>
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>

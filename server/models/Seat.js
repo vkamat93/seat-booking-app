@@ -42,6 +42,16 @@ const seatSchema = new mongoose.Schema({
   bookedAt: {
     type: Date,
     default: null
+  },
+  // Perpetual booking details
+  isPermanent: {
+    type: Boolean,
+    default: false
+  },
+  permanentUser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
   }
 });
 

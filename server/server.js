@@ -11,6 +11,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const seatRoutes = require('./routes/seats');
 const adminRoutes = require('./routes/admin');
+const responsePlugin = require('./middleware/responsePlugin');
 const { initSeatReleaseJob } = require('./jobs/seatReleaseJob');
 const Seat = require('./models/Seat');
 
@@ -20,6 +21,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(responsePlugin);
 
 // API Routes
 app.use('/api/auth', authRoutes);

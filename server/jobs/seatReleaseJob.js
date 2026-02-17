@@ -22,9 +22,9 @@ const releaseAllSeats = async () => {
   console.log(`[${timestamp}] Starting scheduled seat release...`);
 
   try {
-    // Reset all seats to free
+    // Reset all seats to free EXCEPT those marked as permanent
     const seatResult = await Seat.updateMany(
-      { status: 'booked' },
+      { status: 'booked', isPermanent: { $ne: true } },
       {
         $set: {
           status: 'free',
@@ -34,9 +34,15 @@ const releaseAllSeats = async () => {
       }
     );
 
-    // Clear all user booked seat references
+    // Clear user booked seat references EXCEPT for those holding permanent seats
+    const permanentSeats = await Seat.find({ isPermanent: true }).select('permanentUser');
+    const permanentUserIds = permanentSeats.map(s => s.permanentUser);
+
     const userResult = await User.updateMany(
-      { bookedSeat: { $ne: null } },
+      {
+        bookedSeat: { $ne: null },
+        _id: { $nin: permanentUserIds }
+      },
       { $set: { bookedSeat: null } }
     );
 
@@ -62,101 +68,104 @@ const releaseAllSeats = async () => {
  * Allocate a specific seat to a specific user
  * Called after seat release to reserve seat 495 for a particular user
  */
-const allocateSeatToUser = async (username, seatNumber) => {
+// allocateSeatToUser removed - using database-driven applyScheduledBookings
+
+/**
+ * Automatically apply all scheduled bookings for today
+ */
+const applyScheduledBookings = async () => {
   const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] Starting auto-allocation of seat ${seatNumber} to ${username}...`);
+  console.log(`[${timestamp}] Starting application of scheduled bookings...`);
 
   try {
-    // Find the user
-    const user = await User.findOne({ username });
-    if (!user) {
-      console.log(`[${timestamp}] User '${username}' not found. Skipping auto-allocation.`);
-      return { success: false, error: 'User not found' };
-    }
-
-    // Find the seat
-    const seat = await Seat.findOne({ seatNumber });
-    if (!seat) {
-      console.log(`[${timestamp}] Seat ${seatNumber} not found. Skipping auto-allocation.`);
-      return { success: false, error: 'Seat not found' };
-    }
-
-    // Check if seat is already booked
-    if (seat.status === 'booked') {
-      console.log(`[${timestamp}] Seat ${seatNumber} is already booked. Skipping auto-allocation.`);
-      return { success: false, error: 'Seat already booked' };
-    }
-
-    // Book the seat for the user
-    seat.status = 'booked';
-    seat.bookedBy = user._id;
-    seat.bookedAt = new Date();
-    await seat.save();
-
-    // Update user's booked seat reference
-    user.bookedSeat = seat._id;
-    await user.save();
-
-    // Create a Booking record for today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    await Booking.create({
-      user: user._id,
-      seat: seat._id,
+    // 1. Log permanent seats for today's stats
+    const permanentSeats = await Seat.find({ isPermanent: true });
+    let permanentCount = 0;
+    for (const seat of permanentSeats) {
+      if (seat.permanentUser) {
+        await Booking.findOneAndUpdate(
+          { date: today, seat: seat._id },
+          {
+            user: seat.permanentUser,
+            status: 'booked',
+            createdBy: seat.permanentUser // System log
+          },
+          { upsert: true }
+        );
+        permanentCount++;
+      }
+    }
+
+    // 2. Find all 'booked' records for today
+    const scheduledBookings = await Booking.find({
       date: today,
-      status: 'booked',
-      createdBy: user._id // System auto-allocation attributed to user
+      status: 'booked'
     });
 
-    console.log(`[${timestamp}] Auto-allocation complete: Seat ${seatNumber} allocated to ${username}`);
+    console.log(`[${timestamp}] Found ${scheduledBookings.length} scheduled bookings for today. ${permanentCount} permanent seats logged.`);
 
-    return {
-      success: true,
-      seatNumber,
-      username
-    };
+    let successCount = 0;
+    for (const booking of scheduledBookings) {
+      try {
+        // Skip if seat is permanent (already handled or blocked)
+        const seat = await Seat.findById(booking.seat);
+        if (seat && seat.isPermanent) continue;
+
+        // Update Seat
+        await Seat.findByIdAndUpdate(booking.seat, {
+          $set: {
+            status: 'booked',
+            bookedBy: booking.user,
+            bookedAt: new Date()
+          }
+        });
+
+        // Update User
+        await User.findByIdAndUpdate(booking.user, {
+          $set: { bookedSeat: booking.seat }
+        });
+
+        successCount++;
+      } catch (err) {
+        console.error(`[${timestamp}] Failed to apply booking ${booking._id}:`, err);
+      }
+    }
+
+    console.log(`[${timestamp}] Successfully applied ${successCount}/${scheduledBookings.length} scheduled bookings.`);
+    return { success: true, count: successCount };
   } catch (error) {
-    console.error(`[${timestamp}] Error during auto-allocation:`, error);
-    return {
-      success: false,
-      error: error.message
-    };
+    console.error(`[${timestamp}] Error during applying scheduled bookings:`, error);
+    return { success: false, error: error.message };
   }
 };
 
 /**
  * Initialize the cron jobs
  * Schedule: '35 1 * * *' = At 01:35 AM every day
- * 
- * Cron format: 'minute hour day-of-month month day-of-week'
- * 35 1 * * * means:
- *   - 35: at minute 35
- *   - 1: at hour 1 (1 AM)
- *   - *: every day of the month
- *   - *: every month
- *   - *: every day of the week
  */
 const initSeatReleaseJob = () => {
-  // Schedule job for 1:35 AM every day - releases all seats then allocates seat 495
+  // Schedule job for 1:35 AM every day
   const job = cron.schedule('35 1 * * *', async () => {
-    // First, release all seats
+    // 1. Release all seats (ignoring permanent ones)
     await releaseAllSeats();
 
-    // Then, allocate seat 495 to the specified user
-    await allocateSeatToUser(AUTO_ALLOCATE_USERNAME, AUTO_ALLOCATE_SEAT_NUMBER);
+    // 2. Apply all scheduled bookings and log permanent seats
+    await applyScheduledBookings();
   }, {
     scheduled: true,
-    timezone: 'Asia/Kolkata' // Adjust timezone as needed
+    timezone: 'Asia/Kolkata'
   });
 
   console.log(`Seat release cron job scheduled for 1:35 AM daily`);
-  console.log(`Auto-allocation: Seat ${AUTO_ALLOCATE_SEAT_NUMBER} will be allocated to '${AUTO_ALLOCATE_USERNAME}' after release`);
 
   return job;
 };
 
 module.exports = {
   initSeatReleaseJob,
-  releaseAllSeats // Export for manual triggering if needed
+  releaseAllSeats,
+  applyScheduledBookings // Export for testing
 };

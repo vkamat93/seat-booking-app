@@ -24,10 +24,10 @@ router.get('/', async (req, res) => {
       .populate('bookedBy', 'username')
       .sort({ row: 1, position: 1 });
 
-    res.json(seats);
+    res.success(seats);
   } catch (error) {
     console.error('Error fetching seats:', error);
-    res.status(500).json({ message: 'Server error fetching seats' });
+    res.error('Server error fetching seats', 'ERR_SERVER_ERROR', 500);
   }
 });
 
@@ -50,9 +50,7 @@ router.post('/book/:seatId', protect, async (req, res) => {
 
     if (currentUser.bookedSeat) {
       await session.abortTransaction();
-      return res.status(400).json({
-        message: 'You already have a booked seat. Release it first to book another.'
-      });
+      return res.error('You already have a booked seat. Release it first to book another.', 'ERR_USER_ALREADY_HAS_SEAT', 400);
     }
 
     // Find and lock the seat for update (atomic operation)
@@ -60,12 +58,12 @@ router.post('/book/:seatId', protect, async (req, res) => {
 
     if (!seat) {
       await session.abortTransaction();
-      return res.status(404).json({ message: 'Seat not found' });
+      return res.error('Seat not found', 'ERR_RESOURCE_NOT_FOUND', 404);
     }
 
     if (seat.status === 'booked') {
       await session.abortTransaction();
-      return res.status(400).json({ message: 'This seat is already booked' });
+      return res.error('This seat is already booked', 'ERR_SEAT_TAKEN', 400);
     }
 
     // Book the seat
@@ -96,14 +94,13 @@ router.post('/book/:seatId', protect, async (req, res) => {
     // Fetch updated seat with user info
     const updatedSeat = await Seat.findById(seatId).populate('bookedBy', 'username');
 
-    res.json({
-      message: 'Seat booked successfully',
+    res.success({
       seat: updatedSeat
-    });
+    }, 'Seat booked successfully');
   } catch (error) {
     await session.abortTransaction();
     console.error('Booking error:', error);
-    res.status(500).json({ message: 'Server error during booking' });
+    res.error('Server error during booking', 'ERR_SERVER_ERROR', 500);
   } finally {
     session.endSession();
   }
@@ -126,7 +123,7 @@ router.post('/release', protect, async (req, res) => {
 
     if (!user.bookedSeat) {
       await session.abortTransaction();
-      return res.status(400).json({ message: 'You have no seat to release' });
+      return res.error('You have no seat to release', 'ERR_NO_SEAT_TO_RELEASE', 400);
     }
 
     // Find and update the seat
@@ -167,11 +164,11 @@ router.post('/release', protect, async (req, res) => {
 
     await session.commitTransaction();
 
-    res.json({ message: 'Seat released successfully' });
+    res.success(null, 'Seat released successfully');
   } catch (error) {
     await session.abortTransaction();
     console.error('Release error:', error);
-    res.status(500).json({ message: 'Server error during seat release' });
+    res.error('Server error during seat release', 'ERR_SERVER_ERROR', 500);
   } finally {
     session.endSession();
   }

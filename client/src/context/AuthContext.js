@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const response = await authAPI.getMe();
-          setUser(response.data);
+          setUser(response.data.data);
         } catch (error) {
           console.error('Auth check failed:', error);
           localStorage.removeItem('token');
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
   // Login user (also handles first-time login/auto-registration)
   const login = async (username, password) => {
     const response = await authAPI.login({ username, password });
-    const { token, ...userData } = response.data;
+    const { token, ...userData } = response.data.data;
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
@@ -58,8 +58,8 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       const response = await authAPI.getMe();
-      setUser(response.data);
-      return response.data;
+      setUser(response.data.data);
+      return response.data.data;
     } catch (error) {
       console.error('Failed to refresh user:', error);
       throw error;

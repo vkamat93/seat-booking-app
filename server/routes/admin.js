@@ -43,7 +43,7 @@ router.get('/stats', async (req, res) => {
 
         const occupancyPercentage = totalSeats > 0 ? ((totalSeats - availableSeatsToday) / totalSeats) * 100 : 0;
 
-        res.json({
+        res.success({
             totalUsers,
             seatsBookedToday,
             totalSeats,
@@ -53,7 +53,7 @@ router.get('/stats', async (req, res) => {
         });
     } catch (error) {
         console.error('Admin stats error:', error);
-        res.status(500).json({ message: 'Server error fetching stats' });
+        res.error('Server error fetching stats', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -129,7 +129,7 @@ router.get('/users', async (req, res) => {
 
         const total = await User.countDocuments(query);
 
-        res.json({
+        res.success({
             users,
             totalPages: Math.ceil(total / limit),
             currentPage: page,
@@ -137,7 +137,7 @@ router.get('/users', async (req, res) => {
         });
     } catch (error) {
         console.error('Admin users error:', error);
-        res.status(500).json({ message: 'Server error fetching users' });
+        res.error('Server error fetching users', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -151,7 +151,7 @@ router.post('/users', async (req, res) => {
 
         const userExists = await User.findOne({ username });
         if (userExists) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.error('User already exists', 'ERR_USER_EXISTS', 400);
         }
 
         const user = await User.create({
@@ -161,17 +161,14 @@ router.post('/users', async (req, res) => {
             mustChangePassword: true
         });
 
-        res.status(201).json({
-            message: 'User created successfully',
-            user: {
-                id: user._id,
-                username: user.username,
-                role: user.role
-            }
-        });
+        res.success({
+            id: user._id,
+            username: user.username,
+            role: user.role
+        }, 'User created successfully', 'SUCCESS'); // Status 201 handled via JSON code if needed, but HTTP returns 200 by default here.
     } catch (error) {
         console.error('Admin create user error:', error);
-        res.status(500).json({ message: 'Server error creating user' });
+        res.error('Server error creating user', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -185,17 +182,17 @@ router.put('/users/:id', async (req, res) => {
         const user = await User.findById(req.params.id);
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.error('User not found', 'ERR_RESOURCE_NOT_FOUND', 404);
         }
 
         if (role) user.role = role;
         if (status) user.status = status;
 
         await user.save();
-        res.json({ message: 'User updated successfully', user });
+        res.success(user, 'User updated successfully');
     } catch (error) {
         console.error('Admin update user error:', error);
-        res.status(500).json({ message: 'Server error updating user' });
+        res.error('Server error updating user', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -207,16 +204,16 @@ router.delete('/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.error('User not found', 'ERR_RESOURCE_NOT_FOUND', 404);
         }
 
         user.isDeleted = true;
         await user.save();
 
-        res.json({ message: 'User deleted successfully' });
+        res.success(null, 'User deleted successfully');
     } catch (error) {
         console.error('Admin delete user error:', error);
-        res.status(500).json({ message: 'Server error deleting user' });
+        res.error('Server error deleting user', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -228,7 +225,7 @@ router.put('/users/:id/reset-password', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.error('User not found', 'ERR_RESOURCE_NOT_FOUND', 404);
         }
 
         // Generate a random 8-character temporary password
@@ -238,14 +235,13 @@ router.put('/users/:id/reset-password', async (req, res) => {
         user.mustChangePassword = true;
         await user.save();
 
-        res.json({
-            message: 'Password reset successfully',
+        res.success({
             username: user.username,
             tempPassword
-        });
+        }, 'Password reset successfully');
     } catch (error) {
         console.error('Admin reset password error:', error);
-        res.status(500).json({ message: 'Server error resetting password' });
+        res.error('Server error resetting password', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -257,12 +253,14 @@ router.get('/bookings', async (req, res) => {
         if (startDate || endDate) {
             match.date = {};
             if (startDate) {
-                const sDate = new Date(startDate);
+                const [y, m, d] = startDate.split('-').map(Number);
+                const sDate = new Date(y, m - 1, d);
                 sDate.setHours(0, 0, 0, 0);
                 match.date.$gte = sDate;
             }
             if (endDate) {
-                const eDate = new Date(endDate);
+                const [y, m, d] = endDate.split('-').map(Number);
+                const eDate = new Date(y, m - 1, d);
                 eDate.setHours(23, 59, 59, 999);
                 match.date.$lte = eDate;
             }
@@ -297,13 +295,123 @@ router.get('/bookings', async (req, res) => {
                 }
             },
             { $unwind: { path: '$seat', preserveNullAndEmptyArrays: true } },
-            { $sort: { [sortField]: sortOrder } }
+            { $sort: { [sortField]: sortOrder, createdAt: -1 } }
         ]);
 
-        res.json(bookings);
+        res.success(bookings);
     } catch (error) {
         console.error('Admin bookings error:', error);
-        res.status(500).json({ message: 'Server error fetching bookings' });
+        res.error('Server error fetching bookings', 'ERR_SERVER_ERROR', 500);
+    }
+});
+
+/**
+ * @route   GET /api/admin/bookings/future
+ * @desc    Get all future scheduled bookings
+ */
+router.get('/bookings/future', async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+
+        const bookings = await Booking.find({
+            date: { $gt: today },
+            status: 'booked'
+        })
+            .populate('user', 'username')
+            .populate('seat', 'seatNumber')
+            .sort({ date: 1 });
+
+        res.success(bookings);
+    } catch (error) {
+        console.error('Admin future bookings error:', error);
+        res.error('Server error fetching future bookings', 'ERR_SERVER_ERROR', 500);
+    }
+});
+
+/**
+ * @route   GET /api/admin/bookings/perpetual
+ * @desc    Get all permanent seat assignments
+ */
+router.get('/bookings/perpetual', async (req, res) => {
+    try {
+        const perpetualSeats = await Seat.find({ isPermanent: true })
+            .populate('permanentUser', 'username');
+        res.success(perpetualSeats);
+    } catch (error) {
+        console.error('Admin perpetual seats error:', error);
+        res.error('Server error fetching perpetual seats', 'ERR_SERVER_ERROR', 500);
+    }
+});
+
+/**
+ * @route   POST /api/admin/bookings/perpetual
+ * @desc    Assign a seat permanently to a user
+ */
+router.post('/bookings/perpetual', async (req, res) => {
+    try {
+        const { userId, seatId } = req.body;
+
+        const seat = await Seat.findById(seatId);
+        if (!seat) return res.error('Seat not found', 'ERR_RESOURCE_NOT_FOUND', 404);
+
+        // Validation: Check for future scheduled bookings
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const futureBookings = await Booking.findOne({
+            seat: seatId,
+            date: { $gte: today },
+            status: 'booked'
+        });
+
+        if (futureBookings) {
+            return res.error('Cannot make seat perpetual: it has existing future bookings.', 'ERR_CONFLICT', 400);
+        }
+
+        seat.isPermanent = true;
+        seat.permanentUser = userId;
+        seat.status = 'booked';
+        seat.bookedBy = userId;
+        seat.bookedAt = new Date();
+        await seat.save();
+
+        // Update User
+        await User.findByIdAndUpdate(userId, { bookedSeat: seatId });
+
+        res.success(seat, 'Seat assigned permanently');
+    } catch (error) {
+        console.error('Admin perpetual booking error:', error);
+        res.error('Server error creating perpetual booking', 'ERR_SERVER_ERROR', 500);
+    }
+});
+
+/**
+ * @route   DELETE /api/admin/bookings/perpetual/:seatId
+ * @desc    Remove permanent status from a seat
+ */
+router.delete('/bookings/perpetual/:seatId', async (req, res) => {
+    try {
+        const seat = await Seat.findById(req.params.seatId);
+        if (!seat) return res.error('Seat not found', 'ERR_RESOURCE_NOT_FOUND', 404);
+
+        const userId = seat.permanentUser;
+
+        seat.isPermanent = false;
+        seat.permanentUser = null;
+        seat.status = 'free';
+        seat.bookedBy = null;
+        seat.bookedAt = null;
+        await seat.save();
+
+        // Update User
+        if (userId) {
+            await User.findByIdAndUpdate(userId, { bookedSeat: null });
+        }
+
+        res.success(null, 'Perpetual status removed');
+    } catch (error) {
+        console.error('Admin delete perpetual error:', error);
+        res.error('Server error removing perpetual status', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -316,15 +424,23 @@ router.post('/bookings/manual', async (req, res) => {
         const { userId, seatId, dates } = req.body; // dates is an array of ISO strings
 
         if (!dates || !Array.isArray(dates) || dates.length === 0) {
-            return res.status(400).json({ message: 'No dates provided' });
+            return res.error('No dates provided', 'ERR_VALIDATION_FAILED', 400);
         }
 
         const results = [];
         const errors = [];
 
         for (const dateStr of dates) {
-            const date = new Date(dateStr);
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const date = new Date(y, m - 1, d);
             date.setHours(0, 0, 0, 0);
+
+            // Validation: Check if seat is permanent
+            const seat = await Seat.findById(seatId);
+            if (seat && seat.isPermanent) {
+                errors.push({ date: dateStr, error: 'This seat is booked everyday (perpetual). Cannot add one-off schedule.' });
+                continue;
+            }
 
             // Check for conflict
             const existing = await Booking.findOne({
@@ -349,14 +465,13 @@ router.post('/bookings/manual', async (req, res) => {
             results.push(booking);
         }
 
-        res.json({
-            message: `Created ${results.length} bookings. ${errors.length} conflicts found.`,
+        res.success({
             results,
             errors
-        });
+        }, `Created ${results.length} bookings. ${errors.length} conflicts found.`);
     } catch (error) {
         console.error('Admin manual booking error:', error);
-        res.status(500).json({ message: 'Server error creating manual bookings' });
+        res.error('Server error creating manual bookings', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -375,9 +490,12 @@ router.post('/bookings/release', async (req, res) => {
             if (userId) query.user = userId;
             if (seatId) query.seat = seatId;
             if (dateRange) {
-                const sDate = new Date(dateRange.start);
+                const [sy, sm, sd] = dateRange.start.split('-').map(Number);
+                const sDate = new Date(sy, sm - 1, sd);
                 sDate.setHours(0, 0, 0, 0);
-                const eDate = new Date(dateRange.end);
+
+                const [ey, em, ed] = dateRange.end.split('-').map(Number);
+                const eDate = new Date(ey, em - 1, ed);
                 eDate.setHours(23, 59, 59, 999);
                 query.date = {
                     $gte: sDate,
@@ -438,13 +556,10 @@ router.post('/bookings/release', async (req, res) => {
             );
         }
 
-        res.json({
-            message: `${result.modifiedCount} bookings released successfully.`,
-            count: result.modifiedCount
-        });
+        res.success({ count: result.modifiedCount }, `${result.modifiedCount} bookings released successfully.`);
     } catch (error) {
         console.error('Admin mass release error:', error);
-        res.status(500).json({ message: 'Server error during mass release' });
+        res.error('Server error during mass release', 'ERR_SERVER_ERROR', 500);
     }
 });
 
@@ -457,7 +572,7 @@ router.get('/users/:id/stats', async (req, res) => {
         const { month } = req.query; // YYYY-MM
         const userId = req.params.id;
 
-        if (!month) return res.status(400).json({ message: 'Month is required' });
+        if (!month) return res.error('Month is required', 'ERR_VALIDATION_FAILED', 400);
 
         const [year, monthVal] = month.split('-').map(Number);
         const startOfMonth = new Date(year, monthVal - 1, 1);
@@ -489,7 +604,7 @@ router.get('/users/:id/stats', async (req, res) => {
             }
         }
 
-        res.json({
+        res.success({
             totalBooked,
             totalCancelled,
             attendancePercentage: totalBooked + totalCancelled > 0 ? (totalBooked / (totalBooked + totalCancelled)) * 100 : 0,
@@ -502,7 +617,7 @@ router.get('/users/:id/stats', async (req, res) => {
         });
     } catch (error) {
         console.error('Admin user stats error:', error);
-        res.status(500).json({ message: 'Server error fetching user stats' });
+        res.error('Server error fetching user stats', 'ERR_SERVER_ERROR', 500);
     }
 });
 

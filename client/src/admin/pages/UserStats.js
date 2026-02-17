@@ -14,7 +14,7 @@ const UserStats = () => {
         const fetchUsers = async () => {
             try {
                 const response = await adminAPI.getUsers({ limit: 100 });
-                setUsers(response.data.users);
+                setUsers(response.data.data.users);
             } catch (error) {
                 console.error('Failed to fetch users:', error);
             }
@@ -27,7 +27,7 @@ const UserStats = () => {
         setLoading(true);
         try {
             const response = await adminAPI.getUserStats(selectedUser, month);
-            setStats(response.data);
+            setStats(response.data.data);
         } catch (error) {
             console.error('Failed to fetch stats:', error);
         } finally {

@@ -9,7 +9,7 @@ const Dashboard = () => {
         const fetchStats = async () => {
             try {
                 const response = await adminAPI.getStats();
-                setStats(response.data);
+                setStats(response.data.data);
             } catch (error) {
                 console.error('Failed to fetch stats:', error);
             } finally {
@@ -17,13 +17,21 @@ const Dashboard = () => {
             }
         };
         fetchStats();
+
+        const interval = setInterval(fetchStats, 10000);
+        return () => clearInterval(interval);
     }, []);
 
     if (loading) return <div>Loading dashboard...</div>;
 
     return (
         <div className="dashboard-page">
-            <h1 style={{ marginBottom: '2rem', color: '#1a202c' }}>Dashboard Overview</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h1 style={{ margin: 0, color: '#1a202c' }}>Dashboard Overview</h1>
+                <button className="admin-btn" onClick={() => { setLoading(true); window.location.reload(); }} disabled={loading}>
+                    🔄 Refresh Page
+                </button>
+            </div>
 
             <div className="stats-grid">
                 <div className="stat-card">
