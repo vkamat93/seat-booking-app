@@ -54,7 +54,14 @@ const bookingSchema = new mongoose.Schema({
 });
 
 // Index for quick lookups by date and seat (prevent double booking)
-bookingSchema.index({ date: 1, seat: 1, status: 1 });
+// Only one active 'booked' status allowed per seat per day
+bookingSchema.index(
+    { date: 1, seat: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { status: 'booked' }
+    }
+);
 // Index for user statistics
 bookingSchema.index({ user: 1, date: 1 });
 
