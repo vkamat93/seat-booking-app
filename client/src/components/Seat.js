@@ -1,5 +1,5 @@
 /**
- * Seat Component - Simple cell display
+ * Seat Component - Simple cell display with hover tooltip
  */
 
 import React from 'react';
@@ -7,9 +7,10 @@ import './Seat.css';
 
 const Seat = ({ seat, isUserSeat, onBook, onRelease, isAuthenticated }) => {
   const isBooked = seat.status === 'booked';
-  
+  const bookedUsername = seat.bookedBy?.username || null;
+
   const handleClick = () => {
-    if (!isAuthenticated) return; // Only authenticated users can book
+    if (!isAuthenticated) return;
     
     if (isUserSeat) {
       onRelease();
@@ -31,6 +32,9 @@ const Seat = ({ seat, isUserSeat, onBook, onRelease, isAuthenticated }) => {
   return (
     <div className={seatClass} onClick={handleClick}>
       {seat.seatNumber}
+      <span className="seat-tooltip">
+        {bookedUsername || 'None'}
+      </span>
     </div>
   );
 };
