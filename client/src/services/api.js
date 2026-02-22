@@ -68,7 +68,9 @@ export const adminAPI = {
   getFutureBookings: () => API.get('/admin/bookings/future'),
   getPerpetualSeats: () => API.get('/admin/bookings/perpetual'),
   createPerpetualBooking: (data) => API.post('/admin/bookings/perpetual', data),
-  deletePerpetualBooking: (seatId) => API.delete(`/admin/bookings/perpetual/${seatId}`)
+  deletePerpetualBooking: (seatId) => API.delete(`/admin/bookings/perpetual/${seatId}`),
+  getDbEnv: () => API.get('/admin/db-env'),
+  switchDbEnv: (env) => API.post('/admin/db-env', { env })
 };
 
 export default API;

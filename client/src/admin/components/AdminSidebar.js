@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import DbEnvToggle from './DbEnvToggle';
 
 const AdminSidebar = () => {
     return (
@@ -22,6 +23,7 @@ const AdminSidebar = () => {
                     Stats
                 </NavLink>
             </nav>
+            <DbEnvToggle />
         </aside>
     );
 };

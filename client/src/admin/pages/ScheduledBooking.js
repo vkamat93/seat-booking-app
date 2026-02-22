@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../services/adminAPI';
 import { seatsAPI } from '../../services/api';
+import { formatUTCDate } from '../../utils/dateUtils';
 
 const ScheduledBooking = () => {
     const [users, setUsers] = useState([]);
@@ -357,7 +358,7 @@ const ScheduledBooking = () => {
                                     ) : (
                                         futureBookings.map(b => (
                                             <tr key={b._id}>
-                                                <td>{new Date(b.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</td>
+                                                <td>{formatUTCDate(b.date, { weekday: 'short', month: 'short', day: 'numeric' })}</td>
                                                 <td style={{ fontWeight: 600 }}>Seat {b.seat?.seatNumber}</td>
                                                 <td>{b.user?.username || 'Unknown'}</td>
                                                 <td>

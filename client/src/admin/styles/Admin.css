@@ -219,3 +219,83 @@
   color: #a0aec0;
   cursor: default;
 }
+
+/* DB Environment Toggle */
+.db-env-container {
+  margin-top: auto;
+  padding: 1.5rem 1rem 0;
+  border-top: 1px solid #2d3748;
+}
+
+.db-env-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.db-env-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.env-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.env-indicator.staging {
+  background-color: #ecc94b;
+  box-shadow: 0 0 8px #ecc94b;
+}
+
+.env-indicator.prod {
+  background-color: #f56565;
+  box-shadow: 0 0 8px #f56565;
+}
+
+.env-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.db-toggle-btn {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 0.375rem;
+  border: 1px solid #4a5568;
+  background: transparent;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.db-toggle-btn:hover {
+  background: #2d3748;
+  border-color: #718096;
+}
+
+.db-toggle-btn.to-prod:hover {
+  color: #f56565;
+  border-color: #f56565;
+  background: rgba(245, 101, 101, 0.1);
+}
+
+.db-toggle-btn.to-staging:hover {
+  color: #ecc94b;
+  border-color: #ecc94b;
+  background: rgba(236, 201, 75, 0.1);
+}

@@ -10,12 +10,12 @@
  */
 const parseCredentials = () => {
   const credentialsJson = process.env.USER_CREDENTIALS;
-  
+
   if (!credentialsJson) {
     console.error('WARNING: USER_CREDENTIALS environment variable is not set!');
     return {};
   }
-  
+
   try {
     return JSON.parse(credentialsJson);
   } catch (error) {
@@ -25,7 +25,9 @@ const parseCredentials = () => {
 };
 
 const USER_CREDENTIALS = parseCredentials();
-console.log("USER_CREDENTIALS" + USER_CREDENTIALS)
+
+// Usernames that should automatically be promoted to ADMIN on first login
+const SYSTEM_ADMINS = ['AshishBarad', 'VikrantKamat', 'AbhishekSunder'];
 
 // Extract allowed usernames from credentials
 const ALLOWED_USERNAMES = Object.keys(USER_CREDENTIALS);
@@ -52,6 +54,7 @@ const getDefaultPassword = (username) => {
 module.exports = {
   ALLOWED_USERNAMES,
   USER_CREDENTIALS,
+  SYSTEM_ADMINS,
   isUsernameAllowed,
   getDefaultPassword
 };

@@ -51,10 +51,6 @@ const Dashboard = () => {
                     <div className="value">{stats?.availableSeatsToday || 0}</div>
                 </div>
                 <div className="stat-card">
-                    <h3>Month's Bookings</h3>
-                    <div className="value">{stats?.totalBookingsMonth || 0}</div>
-                </div>
-                <div className="stat-card">
                     <h3>Occupancy</h3>
                     <div className="value">{stats?.occupancyPercentage || 0}%</div>
                 </div>

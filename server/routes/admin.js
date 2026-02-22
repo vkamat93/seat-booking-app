@@ -10,6 +10,7 @@ const Seat = require('../models/Seat');
 const Booking = require('../models/Booking');
 const { parseDateToISTDayStart } = require('../utils/dateUtils');
 const { protect, admin } = require('../middleware/auth');
+const { getEnv, switchEnv } = require('../config/db');
 
 // Apply admin protection to all routes in this file
 router.use(protect);
@@ -22,15 +23,12 @@ router.use(admin);
 router.get('/stats', async (req, res) => {
     try {
         const totalUsers = await User.countDocuments({ isDeleted: { $ne: true } });
-        const { getISTDayStart } = require('../utils/dateUtils');
-        const today = getISTDayStart();
-        const seatsBookedToday = await Booking.countDocuments({
-            date: today,
-            status: 'booked'
-        });
 
         const totalSeats = await Seat.countDocuments();
         const availableSeatsToday = await Seat.countDocuments({ status: 'free' });
+
+        // Calculate booked seats based on absolute current seat availability status
+        const seatsBookedToday = totalSeats - availableSeatsToday;
 
         // Bookings this month
         const now = new Date();
@@ -42,7 +40,7 @@ router.get('/stats', async (req, res) => {
             status: 'booked'
         });
 
-        const occupancyPercentage = totalSeats > 0 ? ((totalSeats - availableSeatsToday) / totalSeats) * 100 : 0;
+        const occupancyPercentage = totalSeats > 0 ? (seatsBookedToday / totalSeats) * 100 : 0;
 
         res.success({
             totalUsers,
@@ -611,6 +609,33 @@ router.get('/users/:id/stats', async (req, res) => {
     } catch (error) {
         console.error('Admin user stats error:', error);
         res.error('Server error fetching user stats', 'ERR_ADMIN_USER_STATS_SERVER_ERROR', 500);
+    }
+});
+
+/**
+ * @route   GET /api/admin/db-env
+ * @desc    Get current database environment
+ */
+router.get('/db-env', async (req, res) => {
+    res.success({ env: getEnv() });
+});
+
+/**
+ * @route   POST /api/admin/db-env
+ * @desc    Toggle between staging and prod environments
+ */
+router.post('/db-env', async (req, res) => {
+    try {
+        const { env } = req.body;
+        if (!['staging', 'prod'].includes(env)) {
+            return res.error('Invalid environment', 'ERR_INVALID_ENV', 400);
+        }
+
+        await switchEnv(env);
+        res.success({ env: getEnv() }, `Switched to ${env} environment`);
+    } catch (error) {
+        console.error('Environment switch error:', error);
+        res.error('Failed to switch environment', 'ERR_ENV_SWITCH_SERVER_ERROR', 500);
     }
 });
 

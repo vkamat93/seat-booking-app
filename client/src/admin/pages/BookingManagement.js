@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../services/adminAPI';
+import { formatUTCDate } from '../../utils/dateUtils';
 
 const BookingManagement = () => {
     const [bookings, setBookings] = useState([]);
@@ -201,7 +202,7 @@ const BookingManagement = () => {
                                             onChange={() => toggleSelectBooking(booking._id)}
                                         />
                                     </td>
-                                    <td>{new Date(booking.date).toLocaleDateString()}</td>
+                                    <td>{formatUTCDate(booking.date)}</td>
                                     <td>{booking.user?.username || 'Unknown'}</td>
                                     <td>{booking.seat?.seatNumber}</td>
                                     <td>

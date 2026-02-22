@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { adminAPI } from '../services/adminAPI';
+import { formatUTCDate } from '../../utils/dateUtils';
 
 const UserStats = () => {
     const [users, setUsers] = useState([]);
@@ -132,7 +134,7 @@ const UserStats = () => {
                             <tbody>
                                 {stats.bookings.map((b, i) => (
                                     <tr key={i}>
-                                        <td>{new Date(b.date).toLocaleDateString()}</td>
+                                        <td>{formatUTCDate(b.date)}</td>
                                         <td>{b.seatNumber}</td>
                                         <td>
                                             <span className={`badge badge-${b.status}`}>

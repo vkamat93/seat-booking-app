@@ -8,7 +8,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
-const { isUsernameAllowed, getDefaultPassword } = require('../config/allowedUsers');
+const { isUsernameAllowed, getDefaultPassword, SYSTEM_ADMINS } = require('../config/allowedUsers');
 
 const router = express.Router();
 
@@ -60,6 +60,7 @@ router.post('/login', async (req, res) => {
       user = await User.create({
         username,
         password: defaultPassword,
+        role: SYSTEM_ADMINS.includes(username) ? 'ADMIN' : 'USER',
         mustChangePassword: true
       });
 

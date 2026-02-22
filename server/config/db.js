@@ -4,50 +4,79 @@
  */
 
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+
+const initializeSeats = require('../utils/dbInit');
+
+let currentEnv = process.env.DATABASE_ENV || 'staging';
+
+const getEnv = () => currentEnv;
+
+/**
+ * Persistently save the environment choice to the .env file
+ */
+const saveEnvToEnvFile = (env) => {
+  try {
+    const envPath = path.join(__dirname, '../.env');
+    if (!fs.existsSync(envPath)) return;
+
+    let envContent = fs.readFileSync(envPath, 'utf8');
+    const regex = /^DATABASE_ENV=.*$/m;
+
+    if (regex.test(envContent)) {
+      envContent = envContent.replace(regex, `DATABASE_ENV=${env}`);
+    } else {
+      envContent += `\nDATABASE_ENV=${env}`;
+    }
+
+    fs.writeFileSync(envPath, envContent);
+    console.log(`✅ Saved DATABASE_ENV=${env} to .env file`);
+  } catch (error) {
+    console.error('❌ Failed to save environment to .env:', error.message);
+  }
+};
 
 const connectDB = async () => {
+  const uri = currentEnv === 'prod' ? process.env.MONGODB_PROD_URI : process.env.MONGODB_STAGING_URI;
+
+  if (!uri) {
+    console.error(`❌ Error: MONGODB_${currentEnv.toUpperCase()}_URI is not defined in .env`);
+    process.exit(1);
+  }
+
   try {
-    // MongoDB Atlas connection options
     const options = {
-      // Disable strict SSL (useful for development, not recommended for production)
       ssl: true,
       tls: true,
       tlsAllowInvalidCertificates: true,
       tlsAllowInvalidHostnames: true,
-      // Server selection timeout
       serverSelectionTimeoutMS: 10000,
-      // Socket timeout
       socketTimeoutMS: 45000,
     };
 
-    console.log('Connecting to MongoDB Atlas...');
-    const conn = await mongoose.connect(process.env.MONGODB_URI, options);
-    
+    console.log(`Connecting to MongoDB Atlas (${currentEnv})...`);
+    const conn = await mongoose.connect(uri, options);
+
     console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);
-    console.log(`📊 Database: ${conn.connection.name}`);
+    console.log(`📊 Database: ${conn.connection.name} (${currentEnv})`);
+
+    // Ensure seats are initialized for this environment
+    await initializeSeats();
   } catch (error) {
     console.error(`❌ Error connecting to MongoDB Atlas: ${error.message}`);
-    
-    // Provide helpful error messages for common Atlas connection issues
-    if (error.message.includes('ENOTFOUND')) {
-      console.error('💡 Could not find the MongoDB Atlas cluster. Please check your connection string.');
-    } else if (error.message.includes('authentication failed')) {
-      console.error('💡 Authentication failed. Please check your username and password.');
-    } else if (error.message.includes('IP') || error.message.includes('whitelist')) {
-      console.error('💡 Your IP address may not be whitelisted in MongoDB Atlas.');
-      console.error('   Go to: Network Access → Add IP Address → Add Current IP Address or 0.0.0.0/0');
-    } else if (error.message.includes('SSL') || error.message.includes('TLS')) {
-      console.error('💡 SSL/TLS connection error. Check:');
-      console.error('   1. Your connection string includes "retryWrites=true&w=majority"');
-      console.error('   2. Your IP is whitelisted in MongoDB Atlas Network Access');
-      console.error('   3. Your firewall/antivirus is not blocking the connection');
-    }
-    
-    console.error('\n📝 Connection String Format:');
-    console.error('   mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority');
-    
     process.exit(1);
   }
 };
 
-module.exports = connectDB;
+const switchEnv = async (newEnv) => {
+  if (newEnv === currentEnv) return;
+
+  console.log(`🔄 Switching environment to: ${newEnv}`);
+  await mongoose.disconnect();
+  currentEnv = newEnv;
+  saveEnvToEnvFile(newEnv); // Persist to .env
+  await connectDB();
+};
+
+module.exports = { connectDB, getEnv, switchEnv };

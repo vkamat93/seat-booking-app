@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../services/adminAPI';
+import { formatUTCDate } from '../../utils/dateUtils';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -225,7 +226,7 @@ const UserManagement = () => {
                                             </span>
                                         )}
                                     </td>
-                                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                                    <td>{formatUTCDate(user.createdAt)}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             <button
