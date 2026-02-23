@@ -188,6 +188,20 @@ USER_CREDENTIALS={"JohnDoe":"Pass123","MaryJane":"Pass456"}
 3. Share the credentials with the user
 4. User logs in and changes their password
 
+### NEW: UserManagement
+
+Edit `credentials.json` stored in `server/config` with the intended users (case-sensitive usernames):
+
+```json
+{
+  "admin": "AdminPass123",
+  "JohnDoe": "John@1234",
+  "JaneSmith": "Jane@5678"
+}
+```
+
+> **Note:** `credentials.json` is gitignored for security. The example file shows the expected format. Adding and removing users is to be done from the Admin Panel in the web-app in the future by Admin level users to avoid manually add/delete operations
+
 ---
 
 ## 🔌 API Documentation

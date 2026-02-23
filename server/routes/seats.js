@@ -7,6 +7,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Seat = require('../models/Seat');
 const User = require('../models/User');
+const Booking = require('../models/Booking');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -68,14 +69,27 @@ router.post('/book/:seatId', protect, async (req, res) => {
     }
 
     // Book the seat
+    const bookingDate = new Date();
     seat.status = 'booked';
     seat.bookedBy = userId;
-    seat.bookedAt = new Date();
+    seat.bookedAt = bookingDate;
     await seat.save({ session });
 
     // Update user's booked seat reference
     currentUser.bookedSeat = seat._id;
     await currentUser.save({ session });
+
+    // Create booking record for history tracking
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    await Booking.create([{
+      user: userId,
+      seat: seat._id,
+      date: today,
+      status: 'booked',
+      createdBy: userId,
+      createdAt: bookingDate
+    }], { session });
 
     // Commit the transaction
     await session.commitTransaction();
@@ -120,6 +134,21 @@ router.post('/release', protect, async (req, res) => {
     const seat = await Seat.findById(user.bookedSeat).session(session);
 
     if (seat) {
+      // Update the booking record to 'released'
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      await Booking.updateOne(
+        { user: userId, seat: seat._id, date: today, status: 'booked' },
+        { 
+          $set: { 
+            status: 'released',
+            releasedAt: new Date(),
+            releaseReason: 'User released'
+          }
+        },
+        { session }
+      );
+
       seat.status = 'free';
       seat.bookedBy = null;
       seat.bookedAt = null;
