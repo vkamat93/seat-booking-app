@@ -79,17 +79,25 @@ router.post('/book/:seatId', protect, async (req, res) => {
     currentUser.bookedSeat = seat._id;
     await currentUser.save({ session });
 
-    // Create booking record for history tracking
+    // Create or update booking record for history tracking
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    await Booking.create([{
-      user: userId,
-      seat: seat._id,
-      date: today,
-      status: 'booked',
-      createdBy: userId,
-      createdAt: bookingDate
-    }], { session });
+    
+    // Use findOneAndUpdate with upsert to avoid duplicate key errors
+    await Booking.findOneAndUpdate(
+      { seat: seat._id, date: today },
+      {
+        $set: {
+          user: userId,
+          status: 'booked',
+          createdAt: bookingDate,
+          releasedAt: null,
+          releasedBy: null,
+          releaseReason: null
+        }
+      },
+      { upsert: true, session }
+    );
 
     // Commit the transaction
     await session.commitTransaction();
