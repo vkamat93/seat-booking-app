@@ -34,6 +34,12 @@ const userSchema = new mongoose.Schema({
     ref: 'Seat',
     default: null
   },
+  // Role for RBAC
+  role: {
+    type: String,
+    enum: ['USER', 'ADMIN'],
+    default: 'USER'
+  },
   createdAt: {
     type: Date,
     default: Date.now

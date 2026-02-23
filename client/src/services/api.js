@@ -53,4 +53,18 @@ export const seatsAPI = {
   release: () => API.post('/seats/release')
 };
 
+// Admin API calls
+export const adminAPI = {
+  getStats: () => API.get('/admin/stats'),
+  getUsers: (params) => API.get('/admin/users', { params }),
+  createUser: (userData) => API.post('/admin/users', userData),
+  updateUser: (id, userData) => API.put(`/admin/users/${id}`, userData),
+  deleteUser: (id) => API.delete(`/admin/users/${id}`),
+  resetPassword: (id) => API.put(`/admin/users/${id}/reset-password`),
+  getBookings: (params) => API.get('/admin/bookings', { params }),
+  createManualBookings: (data) => API.post('/admin/bookings/manual', data),
+  releaseBookings: (data) => API.post('/admin/bookings/release', data),
+  getUserStats: (id, month) => API.get(`/admin/users/${id}/stats`, { params: { month } })
+};
+
 export default API;

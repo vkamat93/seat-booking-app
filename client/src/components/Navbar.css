@@ -64,6 +64,18 @@
   color: #4cc9f0;
 }
 
+/* Admin Panel link */
+.navbar-admin-link {
+  margin-right: 1rem;
+  color: #4fd1c5;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.navbar-admin-link:hover {
+  color: #81e6d9;
+}
+
 .btn {
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
@@ -160,6 +172,11 @@
   }
   
   .navbar-user {
+    display: none;
+  }
+  
+  /* Hide admin link on mobile */
+  .navbar-admin-link {
     display: none;
   }
   

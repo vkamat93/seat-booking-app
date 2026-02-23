@@ -1,22 +1,41 @@
 /**
  * Allowed Usernames Configuration
  * Only users in this list can register/login
- * Credentials are loaded from environment variable USER_CREDENTIALS
+ * Credentials are loaded from credentials.json file or environment variable (fallback)
  */
 
+const fs = require('fs');
+const path = require('path');
+
 /**
- * Parse user credentials from environment variable
- * Expected format: JSON string like {"admin":"pass1","user1":"pass2"}
+ * Load credentials from JSON file or environment variable (fallback)
+ * Priority: 1. credentials.json file  2. USER_CREDENTIALS env variable
  */
-const parseCredentials = () => {
+const loadCredentials = () => {
+  const credentialsPath = path.join(__dirname, 'credentials.json');
+  
+  // Try loading from JSON file first
+  if (fs.existsSync(credentialsPath)) {
+    try {
+      const fileContent = fs.readFileSync(credentialsPath, 'utf8');
+      const credentials = JSON.parse(fileContent);
+      console.log('✅ Loaded credentials from credentials.json');
+      return credentials;
+    } catch (error) {
+      console.error('ERROR: Failed to parse credentials.json:', error.message);
+    }
+  }
+  
+  // Fallback to environment variable
   const credentialsJson = process.env.USER_CREDENTIALS;
   
   if (!credentialsJson) {
-    console.error('WARNING: USER_CREDENTIALS environment variable is not set!');
+    console.error('WARNING: No credentials.json file or USER_CREDENTIALS env variable found!');
     return {};
   }
   
   try {
+    console.log('✅ Loaded credentials from USER_CREDENTIALS env variable');
     return JSON.parse(credentialsJson);
   } catch (error) {
     console.error('ERROR: Failed to parse USER_CREDENTIALS JSON:', error.message);
@@ -24,12 +43,11 @@ const parseCredentials = () => {
   }
 };
 
-const USER_CREDENTIALS = parseCredentials();
-console.log("USER_CREDENTIALS" + USER_CREDENTIALS)
+const USER_CREDENTIALS = loadCredentials();
 
 // Extract allowed usernames from credentials
 const ALLOWED_USERNAMES = Object.keys(USER_CREDENTIALS);
-console.log("ALLOWED_USERNAMES: " + ALLOWED_USERNAMES)
+console.log('📋 Allowed usernames:', ALLOWED_USERNAMES.join(', '))
 
 /**
  * Check if a username is allowed to register/login

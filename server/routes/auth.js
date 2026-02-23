@@ -80,6 +80,7 @@ router.post('/login', async (req, res) => {
     res.json({
       _id: user._id,
       username: user.username,
+      role: user.role,
       bookedSeat: user.bookedSeat,
       mustChangePassword: user.mustChangePassword,
       token
@@ -103,6 +104,7 @@ router.get('/me', protect, async (req, res) => {
     res.json({
       _id: user._id,
       username: user.username,
+      role: user.role,
       bookedSeat: user.bookedSeat,
       mustChangePassword: user.mustChangePassword
     });
