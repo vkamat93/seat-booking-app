@@ -198,7 +198,7 @@ router.put('/users/:id', async (req, res) => {
 
 /**
  * @route   DELETE /api/admin/users/:id
- * @desc    Soft delete user
+ * @desc    Delete user
  */
 router.delete('/users/:id', async (req, res) => {
     try {
@@ -207,8 +207,22 @@ router.delete('/users/:id', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        user.isDeleted = true;
-        await user.save();
+        // If user has a booked seat, release it first
+        if (user.bookedSeat) {
+            const seatUpdateResult = await Seat.updateOne(
+                { _id: user.bookedSeat },
+                {
+                    $set: {
+                        status: 'free',
+                        bookedBy: null,
+                        bookedAt: null
+                    }
+                }
+            );
+            console.log('Seat release result:', seatUpdateResult);
+        }
+
+        await User.deleteOne({ _id: req.params.id });
 
         res.json({ message: 'User deleted successfully' });
     } catch (error) {
