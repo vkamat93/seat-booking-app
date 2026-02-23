@@ -62,7 +62,6 @@ export const adminAPI = {
   deleteUser: (id) => API.delete(`/admin/users/${id}`),
   resetPassword: (id) => API.put(`/admin/users/${id}/reset-password`),
   getBookings: (params) => API.get('/admin/bookings', { params }),
-  createManualBookings: (data) => API.post('/admin/bookings/manual', data),
   releaseBookings: (data) => API.post('/admin/bookings/release', data),
   getUserStats: (id, month) => API.get(`/admin/users/${id}/stats`, { params: { month } })
 };

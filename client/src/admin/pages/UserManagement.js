@@ -55,16 +55,6 @@ const UserManagement = () => {
         }
     };
 
-    const handleToggleStatus = async (user) => {
-        const newStatus = user.status === 'active' ? 'disabled' : 'active';
-        try {
-            await adminAPI.updateUser(user._id, { status: newStatus });
-            fetchUsers();
-        } catch (error) {
-            alert('Failed to update status');
-        }
-    };
-
     const handleDeleteUser = async (id) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
@@ -74,24 +64,6 @@ const UserManagement = () => {
                 alert('Failed to delete user');
             }
         }
-    };
-
-    const handleResetPassword = async (id) => {
-        if (window.confirm('Are you sure you want to reset this user\'s password to a temporary one?')) {
-            try {
-                const response = await adminAPI.resetPassword(id);
-                const { tempPassword, username } = response.data;
-                setResetModal({ show: true, username, tempPassword });
-                fetchUsers();
-            } catch (error) {
-                alert(error.response?.data?.message || 'Failed to reset password');
-            }
-        }
-    };
-
-    const handleCopyPassword = () => {
-        navigator.clipboard.writeText(resetModal.tempPassword);
-        alert('Password copied to clipboard!');
     };
 
     const requestSort = (key) => {
@@ -194,13 +166,6 @@ const UserManagement = () => {
                                     <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button
-                                                className="admin-btn"
-                                                style={{ background: '#fef3c7', color: '#92400e', fontSize: '0.75rem' }}
-                                                onClick={() => handleResetPassword(user._id)}
-                                            >
-                                                Reset PW
-                                            </button>
                                             <button
                                                 className="admin-btn"
                                                 style={{ background: '#fee2e2', color: '#dc2626', fontSize: '0.75rem' }}

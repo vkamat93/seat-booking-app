@@ -5,11 +5,16 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 const User = require('../models/User');
 const Seat = require('../models/Seat');
 const Booking = require('../models/Booking');
 const { protect, admin } = require('../middleware/auth');
+
+// Path to credentials file
+const credentialsPath = path.join(__dirname, '../config/credentials.json');
 
 // Apply admin protection to all routes in this file
 router.use(protect);
@@ -71,45 +76,22 @@ router.get('/users', async (req, res) => {
         if (role) query.role = role;
         if (status) query.status = status;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
         const sortOrder = order === 'asc' ? 1 : -1;
         let sortField = sortBy;
-        if (sortBy === 'todaySeat') sortField = 'todayBooking.seatInfo.seatNumber';
+        if (sortBy === 'todaySeat') sortField = 'bookedSeatInfo.seatNumber';
 
         const users = await User.aggregate([
             { $match: query },
             {
+                // Lookup the user's currently booked seat from Seat collection
                 $lookup: {
-                    from: 'bookings',
-                    let: { userId: '$_id' },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ['$user', '$$userId'] },
-                                        { $eq: ['$date', today] },
-                                        { $eq: ['$status', 'booked'] }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            $lookup: {
-                                from: 'seats',
-                                localField: 'seat',
-                                foreignField: '_id',
-                                as: 'seatInfo'
-                            }
-                        },
-                        { $unwind: { path: '$seatInfo', preserveNullAndEmptyArrays: true } }
-                    ],
-                    as: 'todayBooking'
+                    from: 'seats',
+                    localField: 'bookedSeat',
+                    foreignField: '_id',
+                    as: 'bookedSeatInfo'
                 }
             },
-            { $unwind: { path: '$todayBooking', preserveNullAndEmptyArrays: true } },
+            { $unwind: { path: '$bookedSeatInfo', preserveNullAndEmptyArrays: true } },
             { $sort: { [sortField]: sortOrder } },
             { $skip: (page - 1) * limit },
             { $limit: limit * 1 },
@@ -119,7 +101,7 @@ router.get('/users', async (req, res) => {
                     role: { $ifNull: ['$role', 'USER'] },
                     status: { $ifNull: ['$status', 'active'] },
                     createdAt: 1,
-                    todaySeat: '$todayBooking.seatInfo.seatNumber'
+                    todaySeat: '$bookedSeatInfo.seatNumber'
                 }
             }
         ]);
@@ -140,30 +122,49 @@ router.get('/users', async (req, res) => {
 
 /**
  * @route   POST /api/admin/users
- * @desc    Create a new user
+ * @desc    Add a new user to credentials.json (user will be auto-created on first login)
  */
 router.post('/users', async (req, res) => {
     try {
         const { username, password, role } = req.body;
 
-        const userExists = await User.findOne({ username });
-        if (userExists) {
-            return res.status(400).json({ message: 'User already exists' });
+        if (!username || !password) {
+            return res.status(400).json({ message: 'Username and password are required' });
         }
 
-        const user = await User.create({
-            username,
-            password,
-            role: role || 'USER',
-            mustChangePassword: true
-        });
+        // Read current credentials
+        let credentials = {};
+        if (fs.existsSync(credentialsPath)) {
+            const fileContent = fs.readFileSync(credentialsPath, 'utf8');
+            credentials = JSON.parse(fileContent);
+        }
+
+        // Check if username already exists in credentials
+        if (credentials[username]) {
+            return res.status(400).json({ message: 'User already exists in credentials' });
+        }
+
+        // Also check if user exists in database
+        const userExists = await User.findOne({ username });
+        if (userExists) {
+            return res.status(400).json({ message: 'User already exists in Database' });
+        }
+
+        // Add new user to credentials
+        credentials[username] = password;
+
+        // Write back to credentials.json
+        fs.writeFileSync(credentialsPath, JSON.stringify(credentials, null, 2));
+
+        // Reload credentials in allowedUsers module
+        // The user will be auto-created on first login with mustChangePassword: true
 
         res.status(201).json({
-            message: 'User created successfully',
+            message: 'User added to credentials successfully. They can now login with the provided password.',
             user: {
-                id: user._id,
-                username: user.username,
-                role: user.role
+                username,
+                role: role || 'USER',
+                note: 'User will be created in database on first login'
             }
         });
     } catch (error) {
@@ -198,7 +199,7 @@ router.put('/users/:id', async (req, res) => {
 
 /**
  * @route   DELETE /api/admin/users/:id
- * @desc    Delete user
+ * @desc    Delete user from database only
  */
 router.delete('/users/:id', async (req, res) => {
     try {
