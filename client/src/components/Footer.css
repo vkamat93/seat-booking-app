@@ -33,6 +33,19 @@
   font-weight: 500;
 }
 
+.footer-privacy-link {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+}
+
+.footer-privacy-link:hover {
+  color: #4cc9f0;
+  text-decoration: underline;
+}
+
 .footer-text .heart {
   color: #e74c3c;
   display: inline-block;
