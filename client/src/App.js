@@ -16,6 +16,7 @@ import UserManagement from './admin/pages/UserManagement';
 import BookingManagement from './admin/pages/BookingManagement';
 import UserStats from './admin/pages/UserStats';
 import './App.css';
+import Footer from './components/Footer';
 
 // Protected route wrapper - redirects to login if not authenticated
 const ProtectedRoute = ({ children }) => {
@@ -126,6 +127,9 @@ function AppContent() {
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
+
+          <Footer/>
+          
         </main>
       </div>
     </Router>
