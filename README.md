@@ -168,27 +168,8 @@ The frontend uses a multi-stage build:
 - Guests can see which desks are available/occupied
 - Login is required to make bookings
 
-## 🔐 User Management
 
-Users are managed via the `USER_CREDENTIALS` environment variable:
-
-```env
-USER_CREDENTIALS={"JohnDoe":"Pass123","MaryJane":"Pass456"}
-```
-
-- **No registration** - Users are pre-defined in the whitelist
-- **Case-sensitive** - Username `JohnDoe` ≠ `johndoe`
-- **Auto-creation** - User accounts are created on first login
-- **Password change required** - All users must change their default password
-
-### Adding New Users
-
-1. Add the username and default password to `USER_CREDENTIALS` in `.env`
-2. Restart the server
-3. Share the credentials with the user
-4. User logs in and changes their password
-
-### NEW: UserManagement
+### NEW: 🔐 UserManagement
 
 Edit `credentials.json` stored in `server/config` with the intended users (case-sensitive usernames):
 
