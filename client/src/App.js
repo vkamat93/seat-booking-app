@@ -15,6 +15,7 @@ import Dashboard from './admin/pages/Dashboard';
 import UserManagement from './admin/pages/UserManagement';
 import BookingManagement from './admin/pages/BookingManagement';
 import UserStats from './admin/pages/UserStats';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import './App.css';
 import Footer from './components/Footer';
 
@@ -124,6 +125,9 @@ function AppContent() {
               <Route path="stats" element={<UserStats />} />
             </Route>
             
+            {/* Privacy Policy - accessible to all */}
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -16,6 +17,9 @@ const Footer = () => {
         <span className="footer-divider">
           ⚡ Connected Vehicle ⚡
         </span>
+        <Link to="/privacy-policy" className="footer-privacy-link">
+          Privacy Policy
+        </Link>
       </div>
     </footer>
   );
