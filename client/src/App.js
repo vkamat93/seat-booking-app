@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
 import ChangePassword from './pages/ChangePassword';
 import AdminLayout from './admin/components/AdminLayout';
 import Dashboard from './admin/pages/Dashboard';
@@ -96,6 +97,16 @@ function AppContent() {
               element={
                 <GuestRoute>
                   <Login />
+                </GuestRoute>
+              }
+            />
+
+            {/* Forgot password - only for guests */}
+            <Route
+              path="/forgot-password"
+              element={
+                <GuestRoute>
+                  <ForgotPassword />
                 </GuestRoute>
               }
             />
