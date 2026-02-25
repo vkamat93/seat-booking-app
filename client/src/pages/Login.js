@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
@@ -93,6 +93,11 @@ const Login = () => {
         <div className="auth-footer">
           <p className="login-hint">
             First time? Use the default password provided by your administrator.
+          </p>
+          <p style={{ marginTop: '1rem' }}>
+            <Link to="/forgot-password" style={{ color: '#4cc9f0', textDecoration: 'none' }}>
+              Forgot Password?
+            </Link>
           </p>
         </div>
       </div>

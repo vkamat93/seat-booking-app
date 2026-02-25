@@ -24,10 +24,11 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Don't redirect if we're on the login page or if this is a login/change-password request
-      // Let the login/change-password components handle their own error display
+      // Don't redirect if this is an auth-related request
+      // Let the auth components handle their own error display
       const isAuthRequest = error.config?.url?.includes('/auth/login') || 
-                            error.config?.url?.includes('/auth/change-password');
+                            error.config?.url?.includes('/auth/change-password') ||
+                            error.config?.url?.includes('/auth/reset-with-default');
       
       if (!isAuthRequest) {
         localStorage.removeItem('token');
@@ -43,7 +44,8 @@ API.interceptors.response.use(
 export const authAPI = {
   login: (credentials) => API.post('/auth/login', credentials),
   getMe: () => API.get('/auth/me'),
-  changePassword: (passwords) => API.post('/auth/change-password', passwords)
+  changePassword: (passwords) => API.post('/auth/change-password', passwords),
+  resetWithDefaultPassword: (data) => API.post('/auth/reset-with-default', data)
 };
 
 // Seats API calls

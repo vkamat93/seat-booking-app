@@ -277,6 +277,36 @@ Authorization: Bearer <token>
 
 ---
 
+#### POST `/api/auth/reset-with-default`
+Reset user password using default credentials from `credentials.json`. Deletes existing user record and creates a new one. Transfers any existing seat booking to the new user.
+
+**Request Body:**
+```json
+{
+  "username": "JohnDoe",
+  "defaultPassword": "John@1234"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Password reset successful. Please set a new password.",
+  "_id": "507f1f77bcf86cd799439099",
+  "username": "JohnDoe",
+  "role": "user",
+  "mustChangePassword": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Error Responses:**
+- `400` - Missing username or default password
+- `401` - Invalid default password
+- `403` - Username not in whitelist
+
+---
+
 ### Seats Endpoints
 
 #### GET `/api/seats`
@@ -555,8 +585,34 @@ lsof -ti:5000 | xargs kill -9
 
 ## 📄 Version
 
-Current version: **v1.0.3**
+Current version: **v1.0.4**
 
 ---
 
-Made with ❤️ by Duggu
+## 📜 Changelog
+
+### v2.0.1 (2026-02-25)
+**Forgot Password Feature**
+
+- ✨ **New Forgot Password page** - Users can reset their password using their default credentials from `credentials.json`
+- 🔗 Added "Forgot Password?" link on Login page
+- 🔄 **Password reset flow:**
+  1. User enters their username and default password (from `credentials.json`)
+  2. System verifies credentials against the whitelist
+  3. Old user record is deleted and new one is created with `mustChangePassword: true`
+  4. User is redirected to change password page
+- 🪑 **Seat booking transfer** - When resetting password, any existing seat booking is automatically transferred to the new user record (fixes ghost user issue)
+- 🛡️ Added `/auth/reset-with-default` API endpoint (public)
+- 🔧 Fixed API interceptor to exclude reset endpoint from 401 redirect
+
+---
+
+### v2.0.0
+- Initial release with core features
+- Whitelist-based authentication
+- First login password change requirement
+- Guest view for desk availability
+- Admin panel
+- Responsive UI
+
+---

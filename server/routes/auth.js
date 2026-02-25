@@ -7,6 +7,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Seat = require('../models/Seat');
 const { protect } = require('../middleware/auth');
 const { isUsernameAllowed, getDefaultPassword } = require('../config/allowedUsers');
 
@@ -153,6 +154,82 @@ router.post('/change-password', protect, async (req, res) => {
   } catch (error) {
     console.error('Change password error:', error);
     res.status(500).json({ message: 'Server error during password change' });
+  }
+});
+
+/**
+ * @route   POST /api/auth/reset-with-default
+ * @desc    Reset user password using default credentials from credentials.json
+ *          Deletes existing user record and creates a new one
+ * @access  Public
+ */
+router.post('/reset-with-default', async (req, res) => {
+  try {
+    const { username, defaultPassword } = req.body;
+
+    // Validate input
+    if (!username || !defaultPassword) {
+      return res.status(400).json({ message: 'Please provide username and default password' });
+    }
+
+    // Check if username is in the allowed list (credentials.json)
+    if (!isUsernameAllowed(username)) {
+      return res.status(403).json({ message: 'Username not authorized. Please contact administrator.' });
+    }
+
+    // Get the default password from credentials.json
+    const storedDefaultPassword = getDefaultPassword(username);
+
+    // Verify the provided default password matches credentials.json
+    if (defaultPassword !== storedDefaultPassword) {
+      return res.status(401).json({ message: 'Invalid default password. Please contact administrator.' });
+    }
+
+    // Find existing user
+    const existingUser = await User.findOne({ username });
+
+    // Store the booked seat ID if the user had a booking
+    let bookedSeatId = null;
+
+    if (existingUser) {
+      // Check if user had a booked seat
+      bookedSeatId = existingUser.bookedSeat;
+      
+      // Delete the existing user record
+      await User.deleteOne({ _id: existingUser._id });
+      console.log(`Reset password: Deleted existing user record for ${username}`);
+    }
+
+    // Create new user with default password and mustChangePassword: true
+    const newUser = await User.create({
+      username,
+      password: storedDefaultPassword,
+      mustChangePassword: true,
+      bookedSeat: bookedSeatId // Transfer the seat booking to new user
+    });
+
+    // If user had a booked seat, update the seat's bookedBy to point to new user
+    if (bookedSeatId) {
+      await Seat.findByIdAndUpdate(bookedSeatId, { bookedBy: newUser._id });
+      console.log(`Reset password: Transferred seat booking to new user record for ${username}`);
+    }
+
+    console.log(`Reset password: Created new user record for ${username}`);
+
+    // Generate token for the new user
+    const token = generateToken(newUser._id);
+
+    res.json({
+      message: 'Password reset successful. Please set a new password.',
+      _id: newUser._id,
+      username: newUser.username,
+      role: newUser.role,
+      mustChangePassword: true,
+      token
+    });
+  } catch (error) {
+    console.error('Reset with default password error:', error);
+    res.status(500).json({ message: 'Server error during password reset' });
   }
 });
 
