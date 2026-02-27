@@ -16,11 +16,11 @@ const router = express.Router();
 /**
  * Generate JWT Token
  * @param {string} id - User ID to encode in token
- * @returns {string} - JWT token valid for 7 days
+ * @returns {string} - JWT token valid for 11 hours (forces daily re-login)
  */
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '7d'
+    expiresIn: '11h'
   });
 };
 

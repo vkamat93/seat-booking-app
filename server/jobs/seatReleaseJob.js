@@ -1,7 +1,10 @@
 /**
  * Seat Release Cron Job
- * Automatically releases all seats at 1:35 AM every day
+ * Automatically releases all seats at a RANDOM hour between 1:35 AM and 5:35 AM every day
  * Then allocates seat 495 to a specific user
+ * 
+ * The random timing (decided each day) prevents users from setting up automated scripts
+ * to book seats immediately after the release.
  */
 
 const cron = require('node-cron');
@@ -9,8 +12,16 @@ const Seat = require('../models/Seat');
 const User = require('../models/User');
 
 // Unit Titan who gets seat 495 automatically
-const AUTO_ALLOCATE_USERNAME = 'AbhishekSunder'; // Change this to the desired username
-const AUTO_ALLOCATE_SEAT_NUMBER = 495;
+const AUTO_ALLOCATE_USERNAME_TITAN = 'AbhishekSunder'; // Change this to the desired username
+const AUTO_ALLOCATE_SEAT_NUMBER_TITAN = 495;
+
+// Admin who gets seat 411 automatically
+const AUTO_ALLOCATE_USERNAME_ASHISH = 'AshishBarad';
+const AUTO_ALLOCATE_SEAT_NUMBER_ASHISH = 411;
+
+// Random hours for seat release (1 = 1 AM, 2 = 2 AM, etc.)
+const RELEASE_HOURS = [1, 2, 3, 4, 5];
+const RELEASE_MINUTE = 15;
 
 /**
  * Release all booked seats and clear user references
@@ -114,32 +125,53 @@ const allocateSeatToUser = async (username, seatNumber) => {
 
 /**
  * Initialize the cron jobs
- * Schedule: '35 1 * * *' = At 01:35 AM every day
+ * 
+ * Strategy: Run cron every hour at :35 from 1 AM to 5 AM.
+ * At the start of each day (1:35 AM), randomly pick which hour will execute.
+ * This way, the random hour changes daily without needing a server restart.
  * 
  * Cron format: 'minute hour day-of-month month day-of-week'
- * 35 1 * * * means:
- *   - 35: at minute 35
- *   - 1: at hour 1 (1 AM)
- *   - *: every day of the month
- *   - *: every month
- *   - *: every day of the week
  */
+let todaysReleaseHour = null;
+let lastPickedDate = null;
+
 const initSeatReleaseJob = () => {
-  // Schedule job for 1:35 AM every day - releases all seats then allocates seat 495
-  const job = cron.schedule('35 1 * * *', async () => {
-    // First, release all seats
-    await releaseAllSeats();
+  // Schedule job for :35 at hours 1, 2, 3, 4, 5 every day
+  const job = cron.schedule(`${RELEASE_MINUTE} 1-5 * * *`, async () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const todayDate = now.toDateString();
     
-    // Then, allocate seat 495 to the specified user
-    await allocateSeatToUser(AUTO_ALLOCATE_USERNAME, AUTO_ALLOCATE_SEAT_NUMBER);
+    // Pick a new random hour at the start of each day (when 1 AM job runs)
+    if (lastPickedDate !== todayDate) {
+      todaysReleaseHour = RELEASE_HOURS[Math.floor(Math.random() * RELEASE_HOURS.length)];
+      lastPickedDate = todayDate;
+      console.log(`[${now.toISOString()}] Today's random release hour: ${todaysReleaseHour}:${RELEASE_MINUTE} AM`);
+    }
+    
+    // Only execute if current hour matches today's randomly picked hour
+    if (currentHour === todaysReleaseHour) {
+      console.log(`[${now.toISOString()}] Executing seat release (random hour matched: ${currentHour})`);
+      
+      // First, release all seats
+      await releaseAllSeats();
+      
+      // Then, allocate seats to the respective privileged user
+      await allocateSeatToUser(AUTO_ALLOCATE_USERNAME_TITAN, AUTO_ALLOCATE_SEAT_NUMBER_TITAN);
+      await allocateSeatToUser(AUTO_ALLOCATE_USERNAME_ASHISH, AUTO_ALLOCATE_SEAT_NUMBER_ASHISH);
+
+    } else {
+      console.log(`[${now.toISOString()}] Skipping - current hour (${currentHour}) != today's release hour (${todaysReleaseHour})`);
+    }
   }, {
     scheduled: true,
-    timezone: 'Asia/Kolkata' // Adjust timezone as needed
+    timezone: 'Asia/Kolkata'
   });
 
-  console.log(`Seat release cron job scheduled for 1:35 AM daily`);
-  console.log(`Auto-allocation: Seat ${AUTO_ALLOCATE_SEAT_NUMBER} will be allocated to '${AUTO_ALLOCATE_USERNAME}' after release`);
-  
+  console.log(`Seat release cron job scheduled - will run at a random hour between 1:${RELEASE_MINUTE} AM and 5:${RELEASE_MINUTE} AM IST daily`);
+  console.log(`Auto-allocation: Seat ${AUTO_ALLOCATE_SEAT_NUMBER_TITAN} will be allocated to '${AUTO_ALLOCATE_USERNAME_TITAN}' after release`);
+  console.log(`Auto-allocation: Seat ${AUTO_ALLOCATE_SEAT_NUMBER_ASHISH} will be allocated to '${AUTO_ALLOCATE_USERNAME_ASHISH}' after release`);
+
   return job;
 };
 
