@@ -10,7 +10,7 @@ A full-stack MERN application for office desk reservation with whitelist-based a
 - 🔒 **Atomic Booking** - Prevents double-booking with MongoDB transactions
 - 👤 **One Desk Per User** - Each user can book only one desk
 - 👀 **Guest View** - Unauthenticated users can view desk availability (but not book)
-- ⏰ **Auto-Release at 4:30 AM** - Desks automatically freed daily using node-cron
+- ⏰ **Auto-Release between 12AM - 5AM** - Desks automatically freed daily using node-cron
 - 🎨 **Modern Responsive UI** - Works on desktop, tablet, and mobile devices
 - 📊 **MongoDB Atlas** - Cloud database with connection pooling
 
@@ -590,6 +590,16 @@ Current version: **v1.0.4**
 ---
 
 ## 📜 Changelog
+
+### v2.0.2 (2026-02-27)
+**Modify JWT expiry and Cron job timing Feature**
+
+- **Modified JWT expiry**
+  - to deter script users from auto booking seat :P
+- **Randomized Cron Job Time**
+  - randomized the timing of the seat release cron job b/w 12AM and 5AM
+
+---
 
 ### v2.0.1 (2026-02-25)
 **Forgot Password Feature**

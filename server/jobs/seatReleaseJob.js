@@ -1,7 +1,7 @@
 /**
  * Seat Release Cron Job
- * Automatically releases all seats at a RANDOM hour between 1:35 AM and 5:35 AM every day
- * Then allocates seat 495 to a specific user
+ * Automatically releases all seats at a RANDOM hour between 1:15 AM and 5:15 AM every day
+ * Then allocates seat to a specific user
  * 
  * The random timing (decided each day) prevents users from setting up automated scripts
  * to book seats immediately after the release.
@@ -126,8 +126,8 @@ const allocateSeatToUser = async (username, seatNumber) => {
 /**
  * Initialize the cron jobs
  * 
- * Strategy: Run cron every hour at :35 from 1 AM to 5 AM.
- * At the start of each day (1:35 AM), randomly pick which hour will execute.
+ * Strategy: Run cron every hour at :15 from 1 AM to 5 AM.
+ * At the start of each day (1:15 AM), randomly pick which hour will execute.
  * This way, the random hour changes daily without needing a server restart.
  * 
  * Cron format: 'minute hour day-of-month month day-of-week'
@@ -136,7 +136,7 @@ let todaysReleaseHour = null;
 let lastPickedDate = null;
 
 const initSeatReleaseJob = () => {
-  // Schedule job for :35 at hours 1, 2, 3, 4, 5 every day
+  // Schedule job for :15 at hours 1, 2, 3, 4, 5 every day
   const job = cron.schedule(`${RELEASE_MINUTE} 1-5 * * *`, async () => {
     const now = new Date();
     const currentHour = now.getHours();
