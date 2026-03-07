@@ -41,7 +41,7 @@ const Login = () => {
   return (
     <div className="auth-container">
       {/* Weekend Stop Image Overlay */}
-      < WeekendOverlay/>
+      <WeekendOverlay />
 
       <div className="auth-card">
         <div className="auth-header">

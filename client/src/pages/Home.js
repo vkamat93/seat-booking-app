@@ -11,6 +11,7 @@ import './Home.css';
 import { Link } from 'react-router-dom';
 import { formattedCustomDate } from '../utils/currentDateDay';
 import WeekendOverlay from '../components/WeekendOverlay';
+import { isWeekend } from '../utils/dateUtils';
 
 const Home = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();

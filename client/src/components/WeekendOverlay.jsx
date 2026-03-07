@@ -1,12 +1,11 @@
-import React, { useState, useContext } from 'react'
-import { WeekendContext } from '../context/WeekendContext';
-import './WeekendOverlay.css';
+import { useState } from "react"
+import { isWeekend } from "../utils/dateUtils"
+import "./WeekendOverlay.css"
 
 const WeekendOverlay = () => {
-    const { isWeekend } = useContext(WeekendContext);
-    // Each instance of WeekendOverlay has its own local state
-    const [showOverlay, setShowOverlay] = useState(isWeekend());
+    const [showOverlay, setShowOverlay] = useState(isWeekend())
 
+    // Don't render anything if overlay should be hidden
     if (!showOverlay) return null;
 
     return (

@@ -19,7 +19,6 @@ import UserStats from './admin/pages/UserStats';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import './App.css';
 import Footer from './components/Footer';
-import { WeekendProvider } from './context/WeekendContext';
 
 // Protected route wrapper - redirects to login if not authenticated
 const ProtectedRoute = ({ children }) => {
@@ -145,7 +144,7 @@ function AppContent() {
           </Routes>
 
           <Footer />
-          
+
         </main>
       </div>
     </Router>
@@ -155,9 +154,7 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <WeekendProvider>
         <AppContent />
-      </WeekendProvider>
     </AuthProvider>
   );
 }
