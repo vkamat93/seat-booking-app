@@ -23,22 +23,22 @@ import Footer from './components/Footer';
 // Protected route wrapper - redirects to login if not authenticated
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
+
   if (loading) {
     return <div className="loading-screen">Loading...</div>;
   }
-  
+
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 // Guest route wrapper - redirects to home if already authenticated
 const GuestRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
+
   if (loading) {
     return <div className="loading-screen">Loading...</div>;
   }
-  
+
   return !isAuthenticated ? children : <Navigate to="/" />;
 };
 
@@ -90,7 +90,7 @@ function AppContent() {
           <Routes>
             {/* Home page - accessible to all */}
             <Route path="/" element={<Home />} />
-            
+
             {/* Auth pages - only for guests */}
             <Route
               path="/login"
@@ -135,7 +135,7 @@ function AppContent() {
               <Route path="bookings" element={<BookingManagement />} />
               <Route path="stats" element={<UserStats />} />
             </Route>
-            
+
             {/* Privacy Policy - accessible to all */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
@@ -143,8 +143,8 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
 
-          <Footer/>
-          
+          <Footer />
+
         </main>
       </div>
     </Router>
@@ -154,7 +154,7 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+        <AppContent />
     </AuthProvider>
   );
 }

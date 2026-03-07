@@ -3,13 +3,15 @@
  * Main page displaying office desk booking interface
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { seatsAPI } from '../services/api';
 import SeatGrid from '../components/SeatGrid';
 import './Home.css';
 import { Link } from 'react-router-dom';
 import { formattedCustomDate } from '../utils/currentDateDay';
+import WeekendOverlay from '../components/WeekendOverlay';
+import { isWeekend } from '../utils/dateUtils';
 
 const Home = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();
@@ -89,6 +91,9 @@ const Home = () => {
 
   return (
     <div className="home-container">
+      {/* Weekend Stop Image Overlay */}
+      < WeekendOverlay/>
+
       <div className="home-header">
         <h1>👨🏻‍💻Connected Vehicle Desk Booking👩🏻‍💻</h1>
         <p>Reserve your workspace for {formattedCustomDate}</p>

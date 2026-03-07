@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
+import WeekendOverlay from '../components/WeekendOverlay';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -39,6 +40,9 @@ const Login = () => {
 
   return (
     <div className="auth-container">
+      {/* Weekend Stop Image Overlay */}
+      <WeekendOverlay />
+
       <div className="auth-card">
         <div className="auth-header">
           <h1>Welcome Back</h1>
