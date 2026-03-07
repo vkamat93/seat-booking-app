@@ -19,26 +19,27 @@ import UserStats from './admin/pages/UserStats';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import './App.css';
 import Footer from './components/Footer';
+import { WeekendProvider } from './context/WeekendContext';
 
 // Protected route wrapper - redirects to login if not authenticated
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
+
   if (loading) {
     return <div className="loading-screen">Loading...</div>;
   }
-  
+
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 // Guest route wrapper - redirects to home if already authenticated
 const GuestRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
+
   if (loading) {
     return <div className="loading-screen">Loading...</div>;
   }
-  
+
   return !isAuthenticated ? children : <Navigate to="/" />;
 };
 
@@ -90,7 +91,7 @@ function AppContent() {
           <Routes>
             {/* Home page - accessible to all */}
             <Route path="/" element={<Home />} />
-            
+
             {/* Auth pages - only for guests */}
             <Route
               path="/login"
@@ -135,7 +136,7 @@ function AppContent() {
               <Route path="bookings" element={<BookingManagement />} />
               <Route path="stats" element={<UserStats />} />
             </Route>
-            
+
             {/* Privacy Policy - accessible to all */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
@@ -143,7 +144,7 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
 
-          <Footer/>
+          <Footer />
           
         </main>
       </div>
@@ -154,7 +155,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <WeekendProvider>
+        <AppContent />
+      </WeekendProvider>
     </AuthProvider>
   );
 }
