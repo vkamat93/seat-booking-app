@@ -51,7 +51,9 @@ export const authAPI = {
 // Seats API calls
 export const seatsAPI = {
   getAll: () => API.get('/seats'),
-  book: (seatId) => API.post(`/seats/book/${seatId}`),
+  book: (seatId, token) => API.post(`/seats/book/${seatId}`, {
+    captchaToken: token
+  }),
   release: () => API.post('/seats/release')
 };
 
