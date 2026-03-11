@@ -20,7 +20,7 @@ const WeekendOverlay = () => {
                 onClick={() => setShowOverlay(false)}
                 aria-label="Close overlay"
             >
-                Ugh, Let me in
+                IDK, Let me in
             </button>
         </div>
     )
