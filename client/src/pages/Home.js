@@ -11,7 +11,7 @@ import './Home.css';
 import { Link } from 'react-router-dom';
 import { formattedCustomDate } from '../utils/currentDateDay';
 import WeekendOverlay from '../components/WeekendOverlay';
-import { isWeekend } from '../utils/dateUtils';
+import {useGoogleReCaptcha} from 'react-google-recaptcha-v3'
 
 const Home = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();
@@ -20,6 +20,7 @@ const Home = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   // Fetch all desks
   const fetchSeats = useCallback(async () => {
@@ -51,10 +52,17 @@ const Home = () => {
       return;
     }
 
+    if (!executeRecaptcha) {
+      console.log("Recaptcha not ready");
+      return;
+    }
+
+    const token = await executeRecaptcha("book_seat_action");
+
     try {
       setActionLoading(true);
       setError('');
-      await seatsAPI.book(seatId);
+      await seatsAPI.book(seatId, token);
       setSuccess('Desk booked successfully!');
       await fetchSeats();
       await refreshUser();

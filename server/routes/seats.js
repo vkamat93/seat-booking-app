@@ -9,6 +9,7 @@ const Seat = require('../models/Seat');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
 const { protect } = require('../middleware/auth');
+const { verifyCaptcha } = require('../utils/captchaService');
 
 const router = express.Router();
 
@@ -37,6 +38,17 @@ router.get('/', async (req, res) => {
  * @access  Private
  */
 router.post('/book/:seatId', protect, async (req, res) => {
+
+  const {captchaToken} = req.body;
+  const captchaResult = await verifyCaptcha(captchaToken);
+  console.log(captchaResult)
+
+  if (!captchaResult.success || captchaResult.score < 0.5) {
+    return res.status(403).json({
+      message: "Our system prefers humans over robots.. Try booking from the WebApp"
+    });
+  }
+
   // Start a session for atomic transaction
   const session = await mongoose.startSession();
   session.startTransaction();

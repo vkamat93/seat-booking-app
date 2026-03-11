@@ -158,7 +158,7 @@ const initSeatReleaseJob = () => {
       
       // Then, allocate seats to the respective privileged user
       await allocateSeatToUser(AUTO_ALLOCATE_USERNAME_TITAN, AUTO_ALLOCATE_SEAT_NUMBER_TITAN);
-      await allocateSeatToUser(AUTO_ALLOCATE_USERNAME_ASHISH, AUTO_ALLOCATE_SEAT_NUMBER_ASHISH);
+      //await allocateSeatToUser(AUTO_ALLOCATE_USERNAME_ASHISH, AUTO_ALLOCATE_SEAT_NUMBER_ASHISH);
 
     } else {
       console.log(`[${now.toISOString()}] Skipping - current hour (${currentHour}) != today's release hour (${todaysReleaseHour})`);

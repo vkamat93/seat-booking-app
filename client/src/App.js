@@ -19,6 +19,7 @@ import UserStats from './admin/pages/UserStats';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import './App.css';
 import Footer from './components/Footer';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 
 // Protected route wrapper - redirects to login if not authenticated
 const ProtectedRoute = ({ children }) => {
@@ -154,7 +155,10 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
+      <GoogleReCaptchaProvider
+        reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}>
         <AppContent />
+      </GoogleReCaptchaProvider>
     </AuthProvider>
   );
 }
