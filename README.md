@@ -529,7 +529,83 @@ seat-booking-webapp/
 - ✅ MongoDB injection prevention with Mongoose
 - ✅ Atomic transactions for booking operations
 - ✅ CORS configuration
+- ✅ Google reCAPTCHA v3 for bot protection
 
+---
+
+## 🤖 Google reCAPTCHA v3 Integration
+
+The application uses **Google reCAPTCHA v3** to prevent automated scripts from booking seats. Unlike v2, reCAPTCHA v3 runs invisibly in the background and assigns a score (0.0 - 1.0) based on user behavior.
+
+### How It Works
+
+1. **Frontend** - When a user clicks to book a seat, the app executes reCAPTCHA and obtains a token
+2. **Backend** - The token is sent with the booking request and verified with Google's API
+3. **Score Check** - If the score is below `0.5`, the request is rejected as likely bot activity
+
+### Setup
+
+#### 1. Get reCAPTCHA Keys
+
+1. Go to [Google reCAPTCHA Admin Console](https://www.google.com/recaptcha/admin)
+2. Register a new site with **reCAPTCHA v3**
+3. Add your domains (e.g., `localhost`, `yourdomain.com`)
+4. Copy the **Site Key** and **Secret Key**
+
+#### 2. Environment Variables
+
+**Client** (`client/.env`):
+```env
+REACT_APP_RECAPTCHA_SITE_KEY=your-site-key-here
+```
+
+**Server** (`server/.env`):
+```env
+RECAPTCHA_SECRET=your-secret-key-here
+```
+
+### Implementation Details
+
+**Frontend** (`react-google-recaptcha-v3`):
+```javascript
+// App.js - Provider wrapper
+<GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}>
+  <App />
+</GoogleReCaptchaProvider>
+
+// Execute on booking
+const { executeRecaptcha } = useGoogleReCaptcha();
+const token = await executeRecaptcha("action_string");
+await seatsAPI.book(seatId, token);
+```
+
+**Backend** (`server/utils/captchaService.js`):
+```javascript
+async function verifyCaptcha(token) {
+  const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      secret: process.env.RECAPTCHA_SECRET,
+      response: token
+    })
+  });
+  return await response.json();
+}
+```
+
+**Score Threshold**:
+- `>= 0.5` - Human (allowed)
+- `< 0.5` - Likely bot (rejected with 403 error)
+
+### Error Response
+
+When reCAPTCHA fails:
+```json
+{
+  "message": "Our system prefers humans over robots.. Try booking from the WebApp"
+}
+```
 ---
 
 ## 🐛 Troubleshooting
@@ -585,11 +661,22 @@ lsof -ti:5000 | xargs kill -9
 
 ## 📄 Version
 
-Current version: **v1.0.4**
+Current version: **v2.0.3**
 
 ---
 
 ## 📜 Changelog
+
+### v2.0.3 (2026-03-11)
+**Google reCAPTCHA v3 Integration**
+
+- 🤖 **Bot Protection** - Added Google reCAPTCHA v3 to prevent automated booking scripts
+- 🛡️ Invisible captcha runs in background during seat booking
+- 📊 Score-based validation (threshold: 0.5) to distinguish humans from bots
+- ⚙️ New environment variables: `REACT_APP_RECAPTCHA_SITE_KEY` (client) and `RECAPTCHA_SECRET` (server)
+- 🚫 Bots receive 403 error: "Our system prefers humans over robots.."
+
+---
 
 ### v2.0.2 (2026-02-27)
 **Modify JWT expiry and Cron job timing Feature**
